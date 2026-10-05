@@ -27,6 +27,9 @@ export class WatchCoordinator extends EventEmitter {
   private failures = new Map<string, { root: string; message: string }>();
   private invalidated = new Set<string>();
   private metadataInvalidated = new Set<string>();
+  // Registration gaps: when each repository's watches finished registering. Reported once setup settles so the
+  // session re-reads only observations that started before their watches existed.
+  private gap = new Map<string, { at: number; metadata: boolean }>();
   private branchEvents = new Map<string, number[]>();
   private changedFiles = new Set<string>();
   private timer?: ReturnType<typeof setTimeout>;
@@ -44,7 +47,7 @@ export class WatchCoordinator extends EventEmitter {
     this.deferPlain = Boolean(options.deferPlain);
     this.roots = [...new Set(roots.map(root => path.resolve(root)))].filter((root, _index, all) => !all.some(other => other !== root && contains(other, root)));
     this.reconcile();
-    if (!this.snapshot().initializing) this.emit('ready', this.snapshot());
+    this.settle();
   }
   setRepositories(repositories: Repository[]): void {
     const signature = JSON.stringify(repositories.map(repo => [repo.id, repo.root, repo.gitDir, repo.commonDir, repo.available]));
@@ -65,7 +68,7 @@ export class WatchCoordinator extends EventEmitter {
   dispose(): void {
     this.disposed = true;
     for (const entry of this.watches.values()) entry.watcher.close();
-    this.watches.clear(); this.queued.clear(); this.rerun.clear();
+    this.watches.clear(); this.queued.clear(); this.rerun.clear(); this.gap.clear();
     if (this.timer) clearTimeout(this.timer);
     this.files.clear(); this.ownGit?.dispose(); this.removeAllListeners();
   }
@@ -124,7 +127,7 @@ export class WatchCoordinator extends EventEmitter {
         if (this.disposed) return;
         if (this.rerun.delete(key)) this.queued.add(key);
         this.pump();
-        if (!this.snapshot().initializing) this.emit('ready', this.snapshot());
+        this.settle();
       });
     }
   }
@@ -164,11 +167,19 @@ export class WatchCoordinator extends EventEmitter {
     }
     for (const entry of this.watches.values()) if (entry.owners.has(scope.key) && !registered.has(entry.root)) this.removeOwner(entry, scope.key);
     // Reconcile observations after the registration gap, including newly created directories.
+    const at = performance.now(), metadata = scope.kind === 'metadata' || scope.kind === 'metadataTree';
     for (const id of this.affected(scope.root)) {
-      this.invalidated.add(id);
-      if (scope.kind === 'metadata' || scope.kind === 'metadataTree') this.metadataInvalidated.add(id);
+      const previous = this.gap.get(id);
+      this.gap.set(id, { at, metadata: metadata || Boolean(previous?.metadata) });
     }
-    this.schedule();
+  }
+  private settle(): void {
+    if (this.disposed || this.snapshot().initializing) return;
+    if (this.gap.size) {
+      const gaps = [...this.gap].map(([id, gap]) => ({ id, ...gap })); this.gap.clear();
+      this.emit('gap', gaps);
+    }
+    this.emit('ready', this.snapshot());
   }
   private async walk(scope: Scope, start: string, directories: Set<string>, ignored: boolean): Promise<void> {
     const pending = [start];

@@ -30,7 +30,7 @@ Confined local inspection is suitable for untrusted workspaces on this Linux tar
 
 ## Scheduling and diagnostics
 
-One process slot is reserved for metadata. Four additional slots serve foreground and background work. Waiting background work receives a turn after at most three newly dispatched foreground requests. Identical concurrent reads without cancellation signals share their result; the queue holds at most 2,048 pending requests.
+Four process slots are reserved for metadata (discovery and branch reads). Four additional slots serve foreground and background work. Waiting background work receives a turn after at most three newly dispatched foreground requests. Identical concurrent reads without cancellation signals share their result; the queue holds at most 2,048 pending requests.
 
 Writes serialize by canonical common-directory path, including linked worktrees. An already-running local write ignores UI cancellation and continues when the runner is disposed. Explicit fetch/push cancellation is supported only when the caller supplies `cancelActiveWrite` with a cancellation signal. A write interrupted by explicit network cancellation, a deadline, or an output cap reports an uncertain outcome and must be inspected before retrying. Default deadlines are 30 seconds for reads and 120 seconds for writes. Output defaults to a 16 MiB cap; compact catalog index enumeration explicitly requests 32 MiB.
 

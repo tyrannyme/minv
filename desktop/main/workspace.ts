@@ -53,6 +53,7 @@ interface Active {
   fallbackOffset: number;
   pendingSelection?: string;
   dirtyRows: Set<string>;
+  readStarted: Map<string, number>;
   rowTimer?: ReturnType<typeof setTimeout>;
 }
 
@@ -198,7 +199,7 @@ export class WorkspaceSession {
     });
     active = { snapshot, session, repositories, browseOnly, rows, controller, git, files, fileService, gitService, watcher, cache,
       queues: { branch: new Set(), status: new Set() }, running: { branch: new Set(), status: new Set() }, idle: [], discovering: true,
-      fallbackOffset: 0, pendingSelection: session?.selectedId && !rows.has(session.selectedId) ? session.selectedId : undefined, dirtyRows: new Set() };
+      fallbackOffset: 0, pendingSelection: session?.selectedId && !rows.has(session.selectedId) ? session.selectedId : undefined, dirtyRows: new Set(), readStarted: new Map() };
     this.active = active;
     watcher.on('invalidation', (event: { ids: string[]; metadataIds?: string[]; branchMetadata?: { id: string; deliveredAt: number }[] }) => {
       if (!this.current(active)) return;
@@ -209,6 +210,14 @@ export class WorkspaceSession {
         const metadata = new Set(metadataIds);
         this.invalidate(active, ids.filter(id => metadata.has(id)));
         this.invalidate(active, ids.filter(id => !metadata.has(id)), ['status']);
+      }
+    });
+    // A read that started after its repository's watches were registered cannot have missed a change.
+    watcher.on('gap', (gaps: { id: string; at: number; metadata: boolean }[]) => {
+      if (!this.current(active)) return;
+      for (const { id, at, metadata } of gaps) {
+        const fields = (metadata ? ['branch', 'status'] as Field[] : ['status'] as Field[]).filter(field => (active.readStarted.get(`${id}:${field}`) ?? Infinity) < at);
+        if (fields.length) this.invalidate(active, [id], fields);
       }
     });
     watcher.on('ready', () => {
@@ -355,6 +364,7 @@ export class WorkspaceSession {
     const repository = active.repositories.get(id); const row = active.rows.get(id);
     if (!repository?.available || !row) return;
     const generation = row[field].generation + 1;
+    active.readStarted.set(`${id}:${field}`, performance.now());
     Object.assign(row, { [field]: { ...row[field], generation, state: 'refreshing' } }); this.publishRow(active, id);
     const runner: GitRunner = { run: (cwd, args, options) => active.git.run(cwd, args, { ...options, ...(field === 'status' ? { lane: id === active.snapshot.selectedId ? 'foreground' : 'background' } : {}) }) };
     let sampled: { value: RepositoryStatus; at: number } | undefined;

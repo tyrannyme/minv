@@ -124,9 +124,10 @@ export class Git implements GitRunner {
 
   private pump(): void {
     if (this.disposed) return;
-    if (this.metadataActive < 1) {
+    while (this.metadataActive < 4) {
       const job = this.take('metadata');
-      if (job) { this.metadataActive++; this.start(job, true); }
+      if (!job) break;
+      this.metadataActive++; this.start(job, true);
     }
     while (this.contentActive < 4) {
       let job: Job | undefined;
