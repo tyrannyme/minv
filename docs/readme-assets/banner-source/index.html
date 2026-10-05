@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Minv README banner</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="banner">
+      <section class="brand">
+        <div class="lockup">
+          <!-- media/brand/mark.svg -->
+          <svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><rect x="0.5" y="0.5" width="23" height="23" rx="7" fill="#eceef2"/><path d="M6.5 15V10.6a2.75 2.75 0 0 1 5.5 0V15m0-4.4a2.75 2.75 0 0 1 5.5 0V15" fill="none" stroke="#0a0b0d" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6.5" cy="18.2" r="1.35" fill="#0a0b0d"/><circle cx="12" cy="18.2" r="1.35" fill="#0a0b0d"/><circle cx="17.5" cy="18.2" r="1.35" fill="#d2f74a" stroke="#0a0b0d" stroke-width=".5"/></svg>
+          <h1>minv</h1>
+        </div>
+        <p class="meaning"><b>Min</b>imal <b>V</b>S Code.</p>
+        <p class="pitch">Browse. Review. Commit.<br /><span>Branch answers first, across dozens of repositories.</span></p>
+        <p class="facts">Code-OSS editor · sandboxed Git reads · scoped writes · no AI</p>
+      </section>
+
+      <section class="island" aria-label="Repository map with rows from the desktop smoke fixture">
+        <header class="bar">
+          <span class="label">4 repositories</span>
+          <span class="readouts"><span><b class="signal">3/3</b> verified</span><span><b class="off">×</b> <b>1</b> offline</span><span><b>2</b> changed</span></span>
+        </header>
+        <ol class="rows">
+          <li class="selected">
+            <span class="glyph" data-f="observed"></span>
+            <span class="repo">minv-workspace</span>
+            <span class="branch">review/main</span>
+            <span class="count">2</span>
+          </li>
+          <li>
+            <span class="glyph" data-f="offline"></span>
+            <span class="repo">docs</span>
+            <span class="branch unverified">not checked out</span>
+            <span class="count dim">—</span>
+          </li>
+          <li>
+            <span class="glyph" data-f="observed"></span>
+            <span class="repo">editor</span>
+            <span class="branch">feature/text-review</span>
+            <span class="count">1</span>
+          </li>
+          <li>
+            <span class="glyph" data-f="observed"></span>
+            <span class="repo">git</span>
+            <span class="branch">fix/branch-freshness</span>
+            <span class="count dim">clean</span>
+          </li>
+        </ol>
+        <footer class="foot">
+          <span>Passive Git · read-only · Landlock + seccomp</span>
+          <span>Dev build · Linux x64</span>
+        </footer>
+      </section>
+    </main>
+    <script type="module" src="script.js"></script>
+  </body>
+</html>

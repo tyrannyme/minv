@@ -1,0 +1,33 @@
+{
+  "timestamp": "2026-10-05T13:39:18.674Z",
+  "scope": "Interrupted WorkspaceSession R64 churn attempt under unrelated host load; invalid for controlled performance acceptance",
+  "fixture": "R64",
+  "parameters": {
+    "repetitionsPlanned": 30,
+    "secondsPerRepetition": 30,
+    "requestedFileChangesPerSecond": 1000,
+    "idleSeconds": 60
+  },
+  "completedRepetitions": [
+    {
+      "iteration": 1,
+      "total": 30,
+      "rate": 999.958568883275,
+      "selectedObservedUpdates": 1,
+      "converged": true,
+      "convergenceMs": 481.51994399999967
+    },
+    {
+      "iteration": 2,
+      "total": 30,
+      "rate": 859.6042624538793,
+      "selectedObservedUpdates": 1,
+      "converged": true,
+      "convergenceMs": 1126.1899890000059
+    }
+  ],
+  "hostLoad": "Concurrent unrelated Java/Minecraft processes observed at approximately 300–630% CPU each during run; these were not changed or stopped",
+  "outcome": "Stopped cleanly because delivered workload fell below target; generated fixture restored; no acceptance verdict",
+  "sourceLog": ".minv-dev/r64-session-churn-30.stderr.log",
+  "releaseEvidence": false
+}

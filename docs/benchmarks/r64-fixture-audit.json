@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "timestamp": "2026-10-05T12:58:49.927Z",
+  "profile": "R64",
+  "method": "Independent streamed Git ls-files and diff enumeration; regular files exclude gitlinks",
+  "expected": {
+    "available": 64,
+    "tracked": 200000,
+    "ignored": 1000000,
+    "untracked": 2000,
+    "modified": 1000,
+    "dirtyRepositories": 16,
+    "unavailable": 3
+  },
+  "observed": {
+    "tracked": 200000,
+    "ignored": 1000000,
+    "untracked": 2000,
+    "modified": 1000,
+    "dirtyRepositories": 16
+  },
+  "pass": true
+}

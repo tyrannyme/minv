@@ -1,0 +1,154 @@
+/* Minv Signal, dark theme. Values from desktop/design-tokens.json; rules from docs/DESIGN.md
+   (no grid, glow or glass; lime only on meaning; islands with defined edges, no panel shadow). */
+@font-face { font-family: "Instrument Sans"; src: url("../../assets/instrument-sans-latin-standard-normal.woff2") format("woff2"); font-weight: 400 700; font-stretch: 75% 100%; }
+@font-face { font-family: "Martian Mono"; src: url("../../assets/martian-mono-latin-standard-normal.woff2") format("woff2"); font-weight: 100 800; font-stretch: 75% 112.5%; }
+@font-face { font-family: "Commit Mono"; src: url("../../assets/commit-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
+
+:root {
+  --canvas: #0a0b0d;
+  --surface: #111216;
+  --raised: #181a1f;
+  --border: #24272e;
+  --line: #1d2026;
+  --fg: #eceef2;
+  --fg2: #a9aebb;
+  --fg3: #80869a;
+  --selection: #2c3514;
+  --accent: #d2f74a;
+  --deleted: #ff6b6b;
+  --ui: "Instrument Sans", system-ui, sans-serif;
+  --readout: "Martian Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: var(--canvas);
+  color: var(--fg);
+  font-family: var(--ui);
+  overflow: hidden;
+}
+
+.readout, .meaning, .facts, .bar, .branch, .count, .foot {
+  font-family: var(--readout);
+  font-stretch: 87.5%;
+}
+
+.banner {
+  display: grid;
+  grid-template-columns: 1fr 700px;
+  align-items: center;
+  gap: 72px;
+  width: 100%;
+  height: 100%;
+  padding: 0 96px 0 104px;
+}
+
+.lockup { display: flex; align-items: center; gap: 28px; }
+.mark { width: 112px; height: 112px; flex: none; }
+
+h1 {
+  font-size: 156px;
+  font-weight: 650;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  margin-top: -14px;
+}
+
+.meaning {
+  margin-top: 26px;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  color: var(--fg2);
+}
+.meaning b { color: var(--accent); font-weight: 600; }
+
+.pitch {
+  margin-top: 26px;
+  font-size: 38px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+.pitch span {
+  display: block;
+  margin-top: 8px;
+  font-size: 21px;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  color: var(--fg2);
+}
+
+.facts {
+  margin-top: 28px;
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg3);
+}
+
+.island {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 52px;
+  padding: 0 22px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg3);
+  white-space: nowrap;
+}
+.readouts { display: flex; gap: 22px; }
+.bar b { color: var(--fg); font-weight: 600; }
+.bar b.signal { color: var(--accent); }
+.bar b.off { color: var(--deleted); }
+
+.rows { list-style: none; padding: 10px; }
+.rows li {
+  display: grid;
+  grid-template-columns: 12px 1fr 1.25fr 64px;
+  gap: 18px;
+  align-items: center;
+  height: 54px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-size: 19px;
+  white-space: nowrap;
+}
+.rows li > span { overflow: hidden; text-overflow: ellipsis; }
+.rows li.selected { background: var(--raised); }
+
+.glyph { position: relative; width: 12px; height: 12px; }
+.glyph::before { content: ""; position: absolute; inset: 2.5px; border-radius: 50%; }
+.glyph[data-f="observed"]::before { background: var(--fg3); }
+.selected .glyph[data-f="observed"]::before { background: var(--fg); }
+.glyph[data-f="offline"]::before { border: 1.5px dashed var(--fg3); }
+
+.repo { font-weight: 500; }
+.branch { font-size: 16px; color: var(--fg2); }
+.selected .branch { color: var(--fg); font-weight: 600; }
+.unverified { font-style: italic; color: var(--fg3); }
+.count { justify-self: end; font-size: 15px; font-weight: 600; color: var(--fg); }
+.count.dim { font-size: 12.5px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg3); }
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 22px;
+  border-top: 1px solid var(--line);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg3);
+}

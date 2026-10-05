@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.upstream/
+.minv-dev/
+fixtures/
+*.vsix
+build/
+desktop/editor/generated/
+desktop/renderer/dist/
+desktop/renderer/src/mock/manifest.generated.ts

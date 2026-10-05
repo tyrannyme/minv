@@ -1,0 +1,487 @@
+{
+  "schemaVersion": 2,
+  "timestamp": "2026-10-05T13:30:17.555Z",
+  "engine": "session",
+  "scope": "Actual desktop WorkspaceSession and its WatchCoordinator with real Git, outside Electron; no UI or complete product budget verdict",
+  "fixture": {
+    "profile": "R64",
+    "counts": {
+      "availableWorkspaceCheckouts": 64,
+      "unavailableEntries": 3,
+      "workspaceCatalogEntries": 67,
+      "companionCheckouts": 1,
+      "trackedRegularFiles": 200000
+    }
+  },
+  "machine": {
+    "platform": "linux",
+    "architecture": "x64",
+    "kernel": "7.1.12-200.fc44.x86_64",
+    "node": "v24.18.0",
+    "git": "git version 2.55.0",
+    "cpu": "AMD Ryzen 9 7900X 12-Core Processor",
+    "logicalCpus": 24,
+    "memoryBytes": 66565939200,
+    "filesystemType": "0x9123683e",
+    "filesystemBlockBytes": 4096,
+    "availableDiskBytes": 30923501568,
+    "securitySoftware": "Not automatically identified; no security-software configuration was changed",
+    "mount": {
+      "source": "/dev/nvme0n1p3[/home]",
+      "fstype": "btrfs",
+      "target": "/home",
+      "options": "rw,relatime,seclabel,compress=zstd:1,ssd,discard=async,space_cache=v2,subvolid=257,subvol=/home"
+    },
+    "devices": [
+      {
+        "name": "sda",
+        "model": "PNY 1TB SATA SSD",
+        "size": "931.5G",
+        "rota": false
+      },
+      {
+        "name": "zram0",
+        "model": null,
+        "size": "8G",
+        "rota": false
+      },
+      {
+        "name": "nvme0n1",
+        "model": "KINGSTON SKC3000S1024G",
+        "size": "953.9G",
+        "rota": false
+      }
+    ]
+  },
+  "controllerOpenMs": 4074.940632,
+  "monitoringReadyFromOpenMs": 4075.063481,
+  "idle": {
+    "durationMs": 1.195784999999887,
+    "cpuMicroseconds": {
+      "user": 189,
+      "system": 0
+    },
+    "percentOfOneCore": 15.805516878035588,
+    "gitProcesses": 0,
+    "scope": "Node controller/watcher process including 1 Hz resource sampler; not desktop/Electron idle CPU"
+  },
+  "runs": [
+    {
+      "iteration": 1,
+      "workload": {
+        "requestedFileChangesPerSecond": 1000,
+        "requestedSeconds": 30,
+        "actualFileChanges": 30000,
+        "writes": 29400,
+        "renames": 600,
+        "branchSwitches": 29,
+        "repositories": 16,
+        "durationMs": 29999.196903000004,
+        "achievedFileChangesPerSecond": 1000.0267706166466,
+        "maximumSchedulingLagMs": 11.261035999996238
+      },
+      "metadataRequestMs": {
+        "unit": "ms",
+        "count": 59,
+        "p50": 20.0827330000011,
+        "p95": 51.21051300000545,
+        "worst": 71.1389969999982,
+        "samples": [
+          20.975580000000264,
+          28.596050000000105,
+          22.61774399999922,
+          26.17486000000008,
+          17.427413000000342,
+          33.47116199999982,
+          21.657656999999745,
+          26.57221799999934,
+          14.226364999998623,
+          28.68311999999969,
+          8.758826999999656,
+          27.41398400000071,
+          11.900573999999324,
+          22.029735000000073,
+          12.083473000000595,
+          27.308055000001332,
+          12.662460999999894,
+          27.054315999999744,
+          20.0827330000011,
+          29.37804700000015,
+          19.54324599999927,
+          21.4987770000007,
+          11.784003999997367,
+          24.849974999997357,
+          21.21363900000142,
+          24.790915000001405,
+          11.588114999998652,
+          20.49532199999885,
+          18.291839999998047,
+          19.028227000002516,
+          21.433477999999013,
+          28.820110000000568,
+          13.817457000001014,
+          17.46439300000202,
+          15.640200000001641,
+          19.826774000001024,
+          26.998545999998896,
+          21.668476999999257,
+          17.31325300000026,
+          14.661284000001615,
+          15.140441999999894,
+          13.178570000000036,
+          16.91799499999979,
+          20.052222999998776,
+          15.68594000000303,
+          24.331796999998915,
+          21.286528000000544,
+          17.039354000000458,
+          18.652797999999166,
+          14.140446000001248,
+          22.079204999998183,
+          71.1389969999982,
+          15.700399000001198,
+          12.227223000001686,
+          15.629550000001473,
+          51.21051300000545,
+          21.467147000003024,
+          60.26752899999701,
+          15.223280999998678
+        ]
+      },
+      "branchFromNativeEventMs": {
+        "unit": "ms",
+        "count": 29,
+        "p50": 66.9596930000007,
+        "p95": 109.48997999999938,
+        "worst": 120.09930900000109,
+        "samples": [
+          35.1987050000007,
+          59.785210000000006,
+          109.48997999999938,
+          90.15652399999999,
+          67.9328400000013,
+          67.49282099999982,
+          77.75264199999947,
+          59.61459100000138,
+          120.09930900000109,
+          81.75415600000088,
+          67.91550900000038,
+          47.9685759999993,
+          40.68267399999968,
+          44.72917800000141,
+          33.82651999999871,
+          61.296354999998584,
+          66.9596930000007,
+          75.21924199999921,
+          80.20404200000121,
+          58.60824499999944,
+          65.51056899999821,
+          80.7447600000014,
+          71.33757600000172,
+          47.9841860000015,
+          60.50863799999934,
+          69.89749200000006,
+          75.86973900000157,
+          41.907428999998956,
+          45.931194000004325
+        ]
+      },
+      "undeliveredBranchObservations": 0,
+      "supersededBranchObservations": 0,
+      "missingBranchEvents": 0,
+      "selectedObservedUpdatesDuringBurst": 0,
+      "selectedPublishedValuesDuringBurst": 169,
+      "selectedValueStatesDuringBurst": {
+        "refreshing": 139,
+        "stale": 30
+      },
+      "selectedStatusConverged": true,
+      "selectedStatusConvergenceMs": 237.93911699999444,
+      "eventLoopDelayMs": {
+        "p50": 20.168703,
+        "p95": 22.265855,
+        "max": 27.672575,
+        "scope": "Node event-loop scheduling only; not painted input latency"
+      },
+      "watcherBefore": {
+        "strategy": "native-directory",
+        "watches": 2242,
+        "openedFiles": 0,
+        "events": 0,
+        "batches": 51,
+        "initializing": false,
+        "pendingScopes": 0,
+        "degraded": false,
+        "failures": [],
+        "branchQueued": 0,
+        "branchRunning": 0,
+        "statusQueued": 0,
+        "statusRunning": 0
+      },
+      "watcherAfter": {
+        "strategy": "native-directory",
+        "watches": 2242,
+        "openedFiles": 0,
+        "events": 60543,
+        "batches": 755,
+        "initializing": false,
+        "pendingScopes": 0,
+        "degraded": false,
+        "failures": [],
+        "branchQueued": 0,
+        "branchRunning": 0,
+        "statusQueued": 0,
+        "statusRunning": 0
+      }
+    }
+  ],
+  "errors": [],
+  "resources": {
+    "scope": "Sampled sum across benchmark Node and live descendant processes; excludes already exited children; not Electron application resources",
+    "intervalMs": 1000,
+    "samples": [
+      {
+        "elapsedMs": 1006.072179,
+        "processCount": 1,
+        "rssBytes": 110395392,
+        "pssBytes": 78213120
+      },
+      {
+        "elapsedMs": 2005.0076350000002,
+        "processCount": 1,
+        "rssBytes": 139337728,
+        "pssBytes": 107089920
+      },
+      {
+        "elapsedMs": 3006.808181,
+        "processCount": 1,
+        "rssBytes": 143802368,
+        "pssBytes": 111620096
+      },
+      {
+        "elapsedMs": 4005.485138,
+        "processCount": 1,
+        "rssBytes": 151408640,
+        "pssBytes": 114316288
+      },
+      {
+        "elapsedMs": 5008.11981,
+        "processCount": 1,
+        "rssBytes": 178454528,
+        "pssBytes": 146292736
+      },
+      {
+        "elapsedMs": 6004.101387,
+        "processCount": 1,
+        "rssBytes": 200192000,
+        "pssBytes": 168012800
+      },
+      {
+        "elapsedMs": 7009.29158,
+        "processCount": 2,
+        "rssBytes": 204419072,
+        "pssBytes": 170728448
+      },
+      {
+        "elapsedMs": 8010.524447,
+        "processCount": 1,
+        "rssBytes": 207998976,
+        "pssBytes": 173777920
+      },
+      {
+        "elapsedMs": 9007.071863000001,
+        "processCount": 1,
+        "rssBytes": 208228352,
+        "pssBytes": 176049152
+      },
+      {
+        "elapsedMs": 10014.294887,
+        "processCount": 1,
+        "rssBytes": 209068032,
+        "pssBytes": 176821248
+      },
+      {
+        "elapsedMs": 11009.06948,
+        "processCount": 1,
+        "rssBytes": 210341888,
+        "pssBytes": 178162688
+      },
+      {
+        "elapsedMs": 12012.046171,
+        "processCount": 1,
+        "rssBytes": 210497536,
+        "pssBytes": 177200128
+      },
+      {
+        "elapsedMs": 13011.569345,
+        "processCount": 1,
+        "rssBytes": 210833408,
+        "pssBytes": 168043520
+      },
+      {
+        "elapsedMs": 14012.747983000001,
+        "processCount": 1,
+        "rssBytes": 211324928,
+        "pssBytes": 179146752
+      },
+      {
+        "elapsedMs": 15012.800145000001,
+        "processCount": 1,
+        "rssBytes": 211808256,
+        "pssBytes": 179629056
+      },
+      {
+        "elapsedMs": 16010.620716000001,
+        "processCount": 1,
+        "rssBytes": 211247104,
+        "pssBytes": 179067904
+      },
+      {
+        "elapsedMs": 17011.068036,
+        "processCount": 1,
+        "rssBytes": 212426752,
+        "pssBytes": 177247232
+      },
+      {
+        "elapsedMs": 18013.919337,
+        "processCount": 1,
+        "rssBytes": 212824064,
+        "pssBytes": 176371712
+      },
+      {
+        "elapsedMs": 19011.471988999998,
+        "processCount": 3,
+        "rssBytes": 221097984,
+        "pssBytes": 183780352
+      },
+      {
+        "elapsedMs": 20013.968171999997,
+        "processCount": 1,
+        "rssBytes": 213647360,
+        "pssBytes": 180683776
+      },
+      {
+        "elapsedMs": 21018.943615,
+        "processCount": 1,
+        "rssBytes": 215175168,
+        "pssBytes": 182199296
+      },
+      {
+        "elapsedMs": 22014.145915999998,
+        "processCount": 1,
+        "rssBytes": 215347200,
+        "pssBytes": 174916608
+      },
+      {
+        "elapsedMs": 23023.900951,
+        "processCount": 1,
+        "rssBytes": 215310336,
+        "pssBytes": 178534400
+      },
+      {
+        "elapsedMs": 24016.818199999998,
+        "processCount": 1,
+        "rssBytes": 217980928,
+        "pssBytes": 185802752
+      },
+      {
+        "elapsedMs": 25014.690490999998,
+        "processCount": 1,
+        "rssBytes": 218132480,
+        "pssBytes": 181560320
+      },
+      {
+        "elapsedMs": 26013.416488,
+        "processCount": 3,
+        "rssBytes": 229060608,
+        "pssBytes": 187896832
+      },
+      {
+        "elapsedMs": 27014.709254999998,
+        "processCount": 1,
+        "rssBytes": 221306880,
+        "pssBytes": 187413504
+      },
+      {
+        "elapsedMs": 28018.620222999998,
+        "processCount": 1,
+        "rssBytes": 221683712,
+        "pssBytes": 189512704
+      },
+      {
+        "elapsedMs": 29015.487767,
+        "processCount": 1,
+        "rssBytes": 221696000,
+        "pssBytes": 189524992
+      },
+      {
+        "elapsedMs": 30015.904528,
+        "processCount": 3,
+        "rssBytes": 229502976,
+        "pssBytes": 191690752
+      },
+      {
+        "elapsedMs": 31019.467096,
+        "processCount": 3,
+        "rssBytes": 231915520,
+        "pssBytes": 190069760
+      },
+      {
+        "elapsedMs": 32016.024792,
+        "processCount": 1,
+        "rssBytes": 224759808,
+        "pssBytes": 189088768
+      },
+      {
+        "elapsedMs": 33019.827289,
+        "processCount": 1,
+        "rssBytes": 225906688,
+        "pssBytes": 172967936
+      },
+      {
+        "elapsedMs": 34019.093535,
+        "processCount": 2,
+        "rssBytes": 230776832,
+        "pssBytes": 193657856
+      },
+      {
+        "elapsedMs": 35017.594023,
+        "processCount": 1,
+        "rssBytes": 229974016,
+        "pssBytes": 192577536
+      },
+      {
+        "elapsedMs": 36037.538758,
+        "processCount": 1,
+        "rssBytes": 237666304,
+        "pssBytes": 201672704
+      },
+      {
+        "elapsedMs": 36766.239772,
+        "processCount": 2,
+        "rssBytes": 240988160,
+        "pssBytes": 203130880
+      }
+    ],
+    "peakRssBytes": 240988160,
+    "peakPssBytes": 203130880,
+    "peakProcesses": 3,
+    "accounting": "RSS sums shared pages more than once; PSS apportions shared pages using Linux smaps_rollup. Samples can miss short-lived processes."
+  },
+  "finalWatcher": {
+    "strategy": "native-directory",
+    "watches": 2242,
+    "openedFiles": 0,
+    "events": 63650,
+    "batches": 781,
+    "initializing": false,
+    "pendingScopes": 0,
+    "degraded": false,
+    "failures": [],
+    "branchQueued": 0,
+    "branchRunning": 0,
+    "statusQueued": 53,
+    "statusRunning": 2
+  },
+  "releaseEvidence": false
+}

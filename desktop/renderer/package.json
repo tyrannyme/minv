@@ -1,0 +1,21 @@
+{
+  "name": "@minv/renderer",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Minv desktop renderer: the application shell drawn around the Code-OSS editor.",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "@fontsource-variable/instrument-sans": "^5.3.0",
+    "@fontsource-variable/martian-mono": "^5.3.0",
+    "@fontsource/commit-mono": "^5.3.0"
+  },
+  "scripts": {
+    "tokens": "node scripts/tokens.mjs",
+    "fixture": "node scripts/fixture.mjs",
+    "build": "node scripts/tokens.mjs && node scripts/fixture.mjs && ../../node_modules/.bin/tsc -p tsconfig.json",
+    "check": "../../node_modules/.bin/tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test test/renderer.test.mjs",
+    "serve": "node scripts/serve.mjs"
+  }
+}

@@ -1,0 +1,138 @@
+// Run with the installed Electron executable, not `node`.
+import { app, BrowserWindow, net, protocol } from 'electron';
+import { writeFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { build } from 'esbuild';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const assets = resolve(root, 'desktop/editor/generated');
+const adapterBundle = resolve(root, '.upstream/editor-adapter-smoke.js');
+const failures = [];
+const requests = [];
+protocol.registerSchemesAsPrivileged([{ scheme: 'minv-editor-test', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, allowServiceWorkers: true } }]);
+app.commandLine.appendSwitch('disable-gpu');
+const timeout = setTimeout(() => { console.error('Editor smoke timed out.'); app.exit(1); }, 30_000);
+
+async function run() { try {
+  await app.whenReady();
+  console.log('Editor smoke: Electron ready.');
+  await build({ entryPoints: [resolve(root, 'desktop/preload/editor-adapter.ts')], outfile: adapterBundle, bundle: true, format: 'esm', platform: 'browser', target: 'es2022' });
+  protocol.handle('minv-editor-test', request => {
+    const url = new URL(request.url);
+    if (url.pathname === '/adapter-test.js') return net.fetch(pathToFileURL(adapterBundle).href);
+    if (url.pathname === '/') return new Response(`<!doctype html><html><head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self'; worker-src 'self'; connect-src 'self'; img-src 'self' data:"><link rel="stylesheet" href="/editor.css"></head><body><div id="editor" style="height:300px;width:800px"></div><div id="diff" style="height:300px;width:800px"></div></body></html>`, { headers: { 'content-type': 'text/html' } });
+    const file = resolve(assets, '.' + decodeURIComponent(url.pathname));
+    if (!file.startsWith(assets + '/')) return new Response('Denied', { status: 403 });
+    return net.fetch(pathToFileURL(file).href);
+  });
+  const window = new BrowserWindow({ show: false, width: 1000, height: 800, webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true } });
+  window.webContents.session.webRequest.onBeforeRequest((details, callback) => {
+    requests.push(details.url);
+    const allowed = details.url.startsWith('minv-editor-test://') || details.url.startsWith(pathToFileURL(assets).href + '/') || details.url === pathToFileURL(adapterBundle).href;
+    if (!allowed) failures.push(`Unexpected network request: ${details.url}`);
+    callback({ cancel: !allowed });
+  });
+  window.webContents.on('console-message', event => {
+    if (event.level === 'warning' || event.level === 'error') failures.push(event.message);
+  });
+  await window.loadURL('minv-editor-test://app/');
+  console.log('Editor smoke: page loaded.');
+  const result = await window.webContents.executeJavaScript(`(async () => {
+    const errors = [];
+    addEventListener('error', event => errors.push(event.message));
+    addEventListener('unhandledrejection', event => errors.push(String(event.reason)));
+    const workerInstances = [];
+    const RealWorker = Worker;
+    globalThis.Worker = class extends RealWorker { constructor(...args) { super(...args); workerInstances.push(String(args[0])); this.addEventListener('error', e => errors.push(e.message)); } };
+    const api = await import('/editor.js');
+    await api.initializeLanguages();
+    const languageCount = api.languages.getLanguages().length;
+    const model = api.editor.createModel('const answer = 42;\\n', 'typescript', api.Uri.parse('file:///minv-smoke.ts'));
+    const view = api.editor.create(document.getElementById('editor'), { model, automaticLayout: true, minimap: { enabled: false }, accessibilitySupport: 'on' });
+    view.executeEdits('smoke', [{range: new api.Range(1, 16, 1, 18), text: '43'}]);
+    const after = model.getValue();
+    await model.undo();
+    const undo = model.getValue();
+    const original = api.editor.createModel('first\\nsecond\\n', 'plaintext');
+    const modified = api.editor.createModel('first\\nchanged\\n', 'plaintext');
+    const diff = api.editor.createDiffEditor(document.getElementById('diff'), { automaticLayout: true, readOnly: true, renderSideBySide: true, diffAlgorithm: 'advanced' });
+    diff.setModel({ original, modified });
+    const deadline = Date.now() + 10000;
+    while ((!diff.getLineChanges()?.length || !api.editor.tokenize('const answer = 42;', 'typescript')[0]?.some(token => token.type)) && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 50));
+    const tokens = api.editor.tokenize('const answer = 42;', 'typescript')[0];
+    const changes = diff.getLineChanges();
+    const grammarChecks = [];
+    for (const id of ['javascript', 'python', 'java', 'rust', 'go', 'json', 'yaml', 'markdown', 'shellscript', 'css', 'html']) {
+      const sample = id === 'json' ? '{"answer": 42}' : id === 'html' ? '<div>Minv</div>' : 'const answer = "value"; // Minv';
+      const checkModel = api.editor.createModel(sample, id);
+      const until = Date.now() + 1000;
+      let colored = false;
+      do { colored = api.editor.tokenize(sample, id)[0]?.some(token => token.type); if (!colored) await new Promise(resolve => setTimeout(resolve, 25)); } while (!colored && Date.now() < until);
+      grammarChecks.push({ id, colored });
+      checkModel.dispose();
+    }
+    const forbiddenCommands = view.getSupportedActions().map(action => action.id).filter(id => /(^|[.])(chat|debug|terminal|inlineSuggest|suggest|rename|formatDocument)([.]|$)/i.test(id));
+    const result = { languageCount, after, undo, tokens, changes, grammarChecks, workerInstances, errors, forbiddenCommands, exportedEditorKeys: Object.keys(api.editor) };
+    diff.dispose(); view.dispose(); model.dispose(); original.dispose(); modified.dispose();
+    const { createEditorAdapter } = await import('/adapter-test.js');
+    const adapter = createEditorAdapter(api);
+    const raw = 'first\\r\\nsecond\\nthird\\rfourth';
+    const doc = { uri: 'file:///mixed.ts', text: raw, languageId: 'typescript', readOnly: false };
+    const first = adapter.create(document.getElementById('editor'), doc);
+    const second = adapter.create(document.getElementById('diff'), doc);
+    const delivered = []; first.onDidChangeContent(() => delivered.push(first.getText()));
+    const native = api.editor.getEditors().find(editor => editor.getModel()?.uri.toString() === api.Uri.parse(doc.uri).toString());
+    native.pushUndoStop();
+    native.executeEdits('adapter-smoke', [{ range: new api.Range(2, 1, 2, 7), text: 'SECOND' }]);
+    native.executeEdits('adapter-smoke', [{ range: new api.Range(2, 7, 2, 7), text: '\\nextra' }]);
+    native.pushUndoStop();
+    const mixedEdited = first.getText();
+    const splitMatches = second.getText() === mixedEdited;
+    await native.getModel().undo();
+    const mixedUndo = first.getText();
+    await native.getModel().redo();
+    const mixedRedo = first.getText();
+    const comparisonNode = document.createElement('div'); comparisonNode.style.height = '150px'; document.body.append(comparisonNode);
+    const comparison = adapter.createComparison(comparisonNode, doc, { ...doc, text: 'changed' }, false);
+    const comparisonIsolated = first.getText() === mixedEdited;
+    comparison.dispose();
+    first.dispose(); first.dispose();
+    const splitSurvives = second.getText() === mixedEdited;
+    const nativeSecond = api.editor.getEditors().find(editor => editor.getModel()?.uri.toString() === api.Uri.parse(doc.uri).toString());
+    const hasGotoLine = !!nativeSecond.getAction('editor.action.gotoLine');
+    second.setText(raw); const reloadPreserves = second.getText() === raw;
+    second.dispose();
+    const reduced = adapter.create(document.getElementById('editor'), { ...doc, uri: 'file:///large.ts', large: true });
+    const largeModel = api.editor.getModel(api.Uri.parse('file:///large.ts'));
+    const reducedPlaintext = largeModel.getLanguageId() === 'plaintext';
+    adapter.setOptions({ fontSize: 16, tabSize: 4, wordWrap: true, renderWhitespace: true });
+    const reducedView = api.editor.getEditors().find(editor => editor.getModel() === largeModel);
+    const reducedWrapDisabled = reducedView.getRawOptions().wordWrap === 'off';
+    reduced.dispose();
+    result.adapter = { mixedEdited, mixedUndo, mixedRedo, delivered, splitMatches, splitSurvives, comparisonIsolated, hasGotoLine, reloadPreserves, reducedPlaintext, reducedWrapDisabled, liveModels: api.editor.getModels().length };
+    return result;
+  })()`);
+  if (result.after !== 'const answer = 43;\n' || result.undo !== 'const answer = 42;\n') failures.push('Edit/undo contents differ.');
+  if (!result.tokens.some(token => token.type)) failures.push('TypeScript syntax did not tokenize.');
+  if (!result.changes?.length) failures.push('Diff worker produced no changes.');
+  if (!result.workerInstances.some(url => url.endsWith('/editor.worker.js'))) failures.push('Bundled editor worker was not used.');
+  for (const check of result.grammarChecks) if (!check.colored) failures.push(`Bundled grammar failed: ${check.id}`);
+  const originalRaw = 'first\r\nsecond\nthird\rfourth';
+  const editedRaw = 'first\r\nSECOND\nextra\nthird\rfourth';
+  if (result.adapter.mixedEdited !== editedRaw || result.adapter.mixedUndo !== originalRaw || result.adapter.mixedRedo !== editedRaw) failures.push('Adapter did not preserve mixed EOL edits/undo/redo.');
+  if (result.adapter.delivered[1] !== editedRaw || result.adapter.delivered[2] !== originalRaw || result.adapter.delivered[3] !== editedRaw) failures.push('Content subscribers observed stale raw text.');
+  for (const key of ['splitMatches', 'splitSurvives', 'comparisonIsolated', 'hasGotoLine', 'reloadPreserves', 'reducedPlaintext', 'reducedWrapDisabled']) if (!result.adapter[key]) failures.push(`Adapter check failed: ${key}`);
+  if (result.adapter.liveModels !== 0) failures.push('Adapter leaked text models.');
+  failures.push(...result.errors, ...result.forbiddenCommands.map(command => `Excluded action: ${command}`));
+  const report = { passed: failures.length === 0, result, requests: [...new Set(requests)].sort(), failures };
+  writeFileSync(resolve(assets, 'smoke.json'), JSON.stringify(report, null, 2) + '\n');
+  console.log(JSON.stringify(report, null, 2));
+  clearTimeout(timeout);
+  app.exit(failures.length ? 1 : 0);
+} catch (error) {
+  console.error(error);
+  clearTimeout(timeout);
+  app.exit(1);
+} }
+void run();

@@ -1,0 +1,118 @@
+{
+  "upstream": "645f29cc3176500b4b5762ba887cf2a7f0ffdf2c",
+  "entries": [
+    "desktop/editor/entry.ts",
+    "src/vs/editor/common/services/editorWebWorkerMain.ts"
+  ],
+  "contributions": [
+    "src/vs/editor/browser/coreCommands.ts",
+    "src/vs/editor/browser/widget/codeEditor/codeEditorWidget.ts",
+    "src/vs/editor/browser/widget/diffEditor/diffEditor.contribution.ts",
+    "src/vs/editor/contrib/anchorSelect/browser/anchorSelect.ts",
+    "src/vs/editor/contrib/bracketMatching/browser/bracketMatching.ts",
+    "src/vs/editor/contrib/caretOperations/browser/caretOperations.ts",
+    "src/vs/editor/contrib/caretOperations/browser/transpose.ts",
+    "src/vs/editor/contrib/clipboard/browser/clipboard.ts",
+    "src/vs/editor/contrib/comment/browser/comment.ts",
+    "src/vs/editor/contrib/contextmenu/browser/contextmenu.ts",
+    "src/vs/editor/contrib/cursorUndo/browser/cursorUndo.ts",
+    "src/vs/editor/contrib/find/browser/findController.ts",
+    "src/vs/editor/contrib/folding/browser/folding.ts",
+    "src/vs/editor/contrib/fontZoom/browser/fontZoom.ts",
+    "src/vs/editor/contrib/indentation/browser/indentation.ts",
+    "src/vs/editor/contrib/lineSelection/browser/lineSelection.ts",
+    "src/vs/editor/contrib/linesOperations/browser/linesOperations.ts",
+    "src/vs/editor/contrib/longLinesHelper/browser/longLinesHelper.ts",
+    "src/vs/editor/contrib/multicursor/browser/multicursor.ts",
+    "src/vs/editor/contrib/readOnlyMessage/browser/contribution.ts",
+    "src/vs/editor/contrib/toggleTabFocusMode/browser/toggleTabFocusMode.ts",
+    "src/vs/editor/contrib/unicodeHighlighter/browser/unicodeHighlighter.ts",
+    "src/vs/editor/contrib/unusualLineTerminators/browser/unusualLineTerminators.ts",
+    "src/vs/editor/contrib/wordOperations/browser/wordOperations.ts",
+    "src/vs/editor/contrib/wordPartOperations/browser/wordPartOperations.ts",
+    "src/vs/editor/standalone/browser/quickAccess/standaloneGotoLineQuickAccess.ts"
+  ],
+  "sourceTransforms": [
+    {
+      "file": "src/vs/editor/standalone/browser/standaloneServices.ts",
+      "sha256": "64c6629204b6e74be323ee52de5b9ca17ab77ae69f5a147e7e0540601fb608bd",
+      "removeExact": "import '../../browser/services/inlineCompletionsService.js';\n",
+      "reason": "Do not register inline-completion snooze commands or completion state in the focused editor."
+    },
+    {
+      "file": "src/vs/base/common/observableInternal/index.ts",
+      "sha256": "8390e720a73bfe7e4273d95138ac78235b9a34a306433ae5fda7a05a2912f959",
+      "removeExact": "import { DevToolsLogger } from './logging/debugger/devToolsLogger.js';\n",
+      "replaceWith": "",
+      "reason": "Remove upstream observable developer debugger transport from the shipping editor."
+    },
+    {
+      "file": "src/vs/base/common/observableInternal/index.ts",
+      "sha256": "8390e720a73bfe7e4273d95138ac78235b9a34a306433ae5fda7a05a2912f959",
+      "removeExact": "if (env && env['VSCODE_DEV_DEBUG_OBSERVABLES']) {\n\t// To debug observables you also need the extension \"ms-vscode.debug-value-editor\"\n\taddLogger(DevToolsLogger.getInstance());\n}",
+      "replaceWith": "",
+      "reason": "Environment flags must not restore the observable debugger."
+    },
+    {
+      "file": "src/vs/editor/browser/editorExtensions.ts",
+      "sha256": "16dd965e131283e37f0fbe6a431825c8f6d8f0de8f9e182ff2dfd02c16af9136",
+      "removeExact": "import { TriggerInlineEditCommandsRegistry } from './triggerInlineEditCommandsRegistry.js';\n",
+      "replaceWith": "",
+      "reason": "No next-edit-suggestion command tracking in the focused editor."
+    },
+    {
+      "file": "src/vs/editor/browser/editorExtensions.ts",
+      "sha256": "16dd965e131283e37f0fbe6a431825c8f6d8f0de8f9e182ff2dfd02c16af9136",
+      "removeExact": "\t\tif (this.canTriggerInlineEdits) {\n\t\t\tTriggerInlineEditCommandsRegistry.registerCommand(this.id);\n\t\t}\n",
+      "replaceWith": "",
+      "reason": "Remove next-edit-suggestion registry writes from ordinary text commands."
+    },
+    {
+      "file": "src/vs/editor/common/diff/linesDiffComputers.ts",
+      "sha256": "3de1ab72cdcf5749f5dda7eafb10ee5020592eb0a2e01af2243b837b460f6efc",
+      "removeExact": "import { getExternalLinesDiffComputer } from './externalLinesDiffComputer.js';\n",
+      "replaceWith": "",
+      "reason": "Only the source-built local diff algorithms are permitted; exclude arbitrary AMD package loading."
+    },
+    {
+      "file": "src/vs/editor/common/diff/linesDiffComputers.ts",
+      "sha256": "3de1ab72cdcf5749f5dda7eafb10ee5020592eb0a2e01af2243b837b460f6efc",
+      "removeExact": "getAdvancedExternal: () => getExternalLinesDiffComputer(false),",
+      "replaceWith": "getAdvancedExternal: () => { throw new Error(\"External diff engines are not bundled in Minv\"); },",
+      "reason": "Explicitly refuse an unbundled diff algorithm."
+    },
+    {
+      "file": "src/vs/editor/common/diff/linesDiffComputers.ts",
+      "sha256": "3de1ab72cdcf5749f5dda7eafb10ee5020592eb0a2e01af2243b837b460f6efc",
+      "removeExact": "getAdvancedWasm: () => getExternalLinesDiffComputer(true),",
+      "replaceWith": "getAdvancedWasm: () => { throw new Error(\"External diff engines are not bundled in Minv\"); },",
+      "reason": "Explicitly refuse an unbundled diff algorithm."
+    }
+  ],
+  "forbiddenSourcePrefixes": [
+    "src/vs/workbench/",
+    "src/vs/code/",
+    "src/vs/server/",
+    "src/vs/platform/agentHost/",
+    "src/vs/platform/mcp/",
+    "src/vs/platform/debug/",
+    "src/vs/platform/terminal/",
+    "src/vs/platform/remote/",
+    "src/vs/platform/remoteTunnel/",
+    "src/vs/platform/github/",
+    "src/vs/platform/extensionManagement/",
+    "src/vs/editor/contrib/inlineCompletions/",
+    "src/vs/editor/contrib/suggest/",
+    "src/vs/editor/contrib/codeAction/",
+    "src/vs/editor/contrib/codelens/",
+    "src/vs/editor/contrib/inlayHints/",
+    "src/vs/editor/contrib/rename/",
+    "src/vs/base/common/observableInternal/logging/debugger/"
+  ],
+  "forbiddenSourceFiles": [
+    "src/vs/editor/browser/services/inlineCompletionsService.ts",
+    "src/vs/editor/browser/triggerInlineEditCommandsRegistry.ts",
+    "src/vs/editor/common/diff/externalLinesDiffComputer.ts",
+    "src/vs/amdX.ts"
+  ]
+}
