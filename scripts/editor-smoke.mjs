@@ -100,7 +100,6 @@ async function run() { try {
     first.dispose(); first.dispose();
     const splitSurvives = second.getText() === mixedEdited;
     const nativeSecond = api.editor.getEditors().find(editor => editor.getModel()?.uri.toString() === api.Uri.parse(doc.uri).toString());
-    const hasGotoLine = !!nativeSecond.getAction('editor.action.gotoLine');
     second.setText(raw); const reloadPreserves = second.getText() === raw;
     second.dispose();
     const reduced = adapter.create(document.getElementById('editor'), { ...doc, uri: 'file:///large.ts', large: true });
@@ -110,7 +109,7 @@ async function run() { try {
     const reducedView = api.editor.getEditors().find(editor => editor.getModel() === largeModel);
     const reducedWrapDisabled = reducedView.getRawOptions().wordWrap === 'off';
     reduced.dispose();
-    result.adapter = { mixedEdited, mixedUndo, mixedRedo, delivered, splitMatches, splitSurvives, comparisonIsolated, hasGotoLine, reloadPreserves, reducedPlaintext, reducedWrapDisabled, liveModels: api.editor.getModels().length };
+    result.adapter = { mixedEdited, mixedUndo, mixedRedo, delivered, splitMatches, splitSurvives, comparisonIsolated, reloadPreserves, reducedPlaintext, reducedWrapDisabled, liveModels: api.editor.getModels().length };
     return result;
   })()`);
   if (result.after !== 'const answer = 43;\n' || result.undo !== 'const answer = 42;\n') failures.push('Edit/undo contents differ.');
@@ -122,7 +121,7 @@ async function run() { try {
   const editedRaw = 'first\r\nSECOND\nextra\nthird\rfourth';
   if (result.adapter.mixedEdited !== editedRaw || result.adapter.mixedUndo !== originalRaw || result.adapter.mixedRedo !== editedRaw) failures.push('Adapter did not preserve mixed EOL edits/undo/redo.');
   if (result.adapter.delivered[1] !== editedRaw || result.adapter.delivered[2] !== originalRaw || result.adapter.delivered[3] !== editedRaw) failures.push('Content subscribers observed stale raw text.');
-  for (const key of ['splitMatches', 'splitSurvives', 'comparisonIsolated', 'hasGotoLine', 'reloadPreserves', 'reducedPlaintext', 'reducedWrapDisabled']) if (!result.adapter[key]) failures.push(`Adapter check failed: ${key}`);
+  for (const key of ['splitMatches', 'splitSurvives', 'comparisonIsolated', 'reloadPreserves', 'reducedPlaintext', 'reducedWrapDisabled']) if (!result.adapter[key]) failures.push(`Adapter check failed: ${key}`);
   if (result.adapter.liveModels !== 0) failures.push('Adapter leaked text models.');
   failures.push(...result.errors, ...result.forbiddenCommands.map(command => `Excluded action: ${command}`));
   const report = { passed: failures.length === 0, result, requests: [...new Set(requests)].sort(), failures };

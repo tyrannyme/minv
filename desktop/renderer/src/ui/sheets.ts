@@ -104,9 +104,21 @@ function fileView(app: App, sheet: Sheet): SheetView {
   let mountedVersion: unknown;
   const pos = h('span'), enc = h('span'), eol = h('span'), lang = h('span'), state = h('span');
   f.foot.append(pos, h('span', { class: 'grow' }), enc, eol, lang, state);
+  const gotoLine = async () => {
+    if (!handle) return;
+    const target = /^\s*(\d+)\s*(?:[:,]\s*(\d+))?\s*$/;
+    const value = await app.prompt({ title: 'Go to line', label: 'Line, or line:column', value: String(handle.getView().line), confirm: 'Go',
+      validate: v => target.test(v) ? undefined : 'Enter a line number, optionally followed by :column.' });
+    const m = value === undefined ? null : target.exec(value);
+    if (m) handle?.revealLine(Number(m[1]), m[2] ? Number(m[2]) : 1);
+    handle?.focus();
+  };
+  f.body.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'g') { e.preventDefault(); e.stopPropagation(); void gotoLine(); }
+  }, true);
   f.tools.append(
     h('button', { class: 'button quiet', title: `Find (${mod} F)`, onclick: () => handle?.run('find') }, 'Find'),
-    h('button', { class: 'button quiet', title: `Go to line (${mod} G)`, onclick: () => handle?.run('gotoLine') }, 'Line'),
+    h('button', { class: 'button quiet', title: `Go to line (${mod} G)`, onclick: () => void gotoLine() }, 'Line'),
     h('button', { class: 'button quiet', onclick: (e: Event) => app.menu(e.currentTarget as HTMLElement, [
       { label: 'Save', hint: `${mod} S`, run: () => void app.save(sheet) },
       { label: 'Review changes', run: () => void app.openReview(sheet.repositoryId, sheet.path!, 'unstaged') },
@@ -148,7 +160,7 @@ function fileView(app: App, sheet: Sheet): SheetView {
         return;
       }
       if (c && !rt.handle) {
-        if (!app.editor) { f.body.replaceChildren(h('div', { class: 'opaque' }, h('h2', null, 'Editor unavailable'), h('p', null, 'The Code-OSS editor build could not be loaded. Files can still be reviewed in the Changes view.'))); return; }
+        if (!app.editor) { f.body.replaceChildren(h('div', { class: 'opaque' }, h('h2', null, 'Editor unavailable'), h('p', null, 'The editor build could not be loaded. Files can still be reviewed in the Changes view.'))); return; }
         f.body.replaceChildren();
         rt.handle = handle = app.editor.create(f.body, { uri: `minv://${encodeURIComponent(sheet.repositoryId)}/${sheet.path}`, text: c.text, languageId: languageOf(sheet.path!), readOnly: false, large: c.large });
         handle.onDidChangeContent(() => app.markDirty(sheet));
@@ -340,7 +352,7 @@ function compareView(app: App, sheet: Sheet): SheetView {
       attr(inline, 'aria-pressed', String(!!c.inline));
       if (c.error) { f.body.replaceChildren(h('div', { class: 'opaque' }, h('h2', null, 'Cannot compare'), h('p', null, c.error))); return; }
       if (c.texts && !c.mounted) {
-        if (!app.editor) { f.body.replaceChildren(h('div', { class: 'opaque' }, h('h2', null, 'Editor unavailable'), h('p', null, 'Comparisons need the Code-OSS editor build.'))); return; }
+        if (!app.editor) { f.body.replaceChildren(h('div', { class: 'opaque' }, h('h2', null, 'Editor unavailable'), h('p', null, 'Comparisons need the editor build.'))); return; }
         f.body.replaceChildren();
         const lang = c.language ?? 'plaintext';
         c.mounted = app.editor.createComparison(f.body, { uri: `minv-compare://${sheet.id}/left/${sheet.left?.label ?? ''}`, text: c.texts[0], languageId: lang, readOnly: true }, { uri: `minv-compare://${sheet.id}/right/${sheet.right?.label ?? ''}`, text: c.texts[1], languageId: lang, readOnly: true }, !!c.inline);
@@ -362,7 +374,7 @@ const appearances: { id: Appearance; label: string; canvas: string; surface: str
 
 function settingsView(app: App): SheetView {
   const f = sheetFrame('Settings');
-  f.where.append(h('div', { class: 'path' }, 'MINV · MINIMAL VS CODE'), h('div', { class: 'file-title' }, 'Settings', h('span', { class: 'aside' }, 'This is every setting Minv has.')));
+  f.where.append(h('div', { class: 'path' }, 'MINV'), h('div', { class: 'file-title' }, 'Settings', h('span', { class: 'aside' }, 'This is every setting Minv has.')));
   const form = h('div', { class: 'settings' });
   f.body.append(form);
   f.foot.append(h('span', null, 'Changes apply immediately and are stored on this machine.'));
@@ -460,7 +472,7 @@ function createFront(app: App) {
               h('span', null, r.name), h('span', { class: 'b' }, `${branchText(r.branch) ?? '—'}${r.status.value && changeCount(r.status.value) ? ` · ${changeCount(r.status.value)}` : ''}`)))),
           h('div', null, h('h2', { class: 'label' }, 'Keys'), h('div', { class: 'primer' }, ...primer.flatMap(([keys, label]) => [kbd(...keys), h('span', null, label)]))),
           state.recoveries.length ? h('div', null, h('h2', { class: 'label' }, 'Unsaved drafts'), ...state.recoveries.map(d => h('button', { class: 'pick', onclick: () => void openDraft(app, d.documentId, d.repositoryId, d.path) }, h('span', null, splitPath(d.path).base), h('span', { class: 'b' }, `${state.rows.get(d.repositoryId)?.name ?? ''}${d.updatedAt ? ` · ${relativeTime(d.updatedAt)}` : ''}`)))) : null),
-        h('p', { class: 'colophon' }, h('b', null, 'minv'), ' — Minimal VS Code. The Code-OSS editor and a repository map. Nothing else competes for your attention.'));
+        h('p', { class: 'colophon' }, h('b', null, 'minv'), ' — an editor and a repository map. Nothing else competes for your attention.'));
     },
   };
 }

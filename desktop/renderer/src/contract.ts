@@ -372,7 +372,7 @@ export interface EditorHandle {
   onDidChangeContent(listener: () => void): () => void;
   onDidChangeCursor(listener: (position: CursorPosition) => void): () => void;
   /** Editor-native actions: find/replace/go to line/undo/redo live inside the editor. */
-  run(action: 'find' | 'replace' | 'gotoLine' | 'undo' | 'redo'): void;
+  run(action: 'find' | 'replace' | 'undo' | 'redo'): void;
   /** Cursor and scroll position for session persistence. */
   getView(): SavedEditorView;
   setView(view: SavedEditorView): void;

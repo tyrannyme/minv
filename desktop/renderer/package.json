@@ -2,7 +2,7 @@
   "name": "@minv/renderer",
   "private": true,
   "version": "0.1.0",
-  "description": "Minv desktop renderer: the application shell drawn around the Code-OSS editor.",
+  "description": "Minv desktop renderer: the application shell drawn around the source-built editor.",
   "license": "MIT",
   "type": "module",
   "devDependencies": {

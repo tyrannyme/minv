@@ -32,7 +32,7 @@ export function createCodeOssAdapter(module: EditorModule): EditorAdapter {
     scrollbar: { verticalScrollbarSize: 10, horizontalScrollbarSize: 10, useShadows: false }, cursorBlinking: 'phase', cursorSmoothCaretAnimation: 'off',
     smoothScrolling: false, folding: !large, guides: { indentation: true, highlightActiveIndentation: false }, bracketPairColorization: { enabled: false },
     quickSuggestions: false, suggestOnTriggerCharacters: false, wordBasedSuggestions: 'off', parameterHints: { enabled: false }, hover: { enabled: false }, links: false,
-    contextmenu: true, largeFileOptimizations: true, unicodeHighlight: { ambiguousCharacters: true, invisibleCharacters: true },
+    contextmenu: true, useShadowDOM: false, find: { addExtraSpaceOnTop: false, seedSearchStringFromSelection: 'selection' }, largeFileOptimizations: true, unicodeHighlight: { ambiguousCharacters: true, invisibleCharacters: true },
   });
 
   let ready = false;
@@ -70,7 +70,7 @@ export function createCodeOssAdapter(module: EditorModule): EditorAdapter {
           return () => d.dispose();
         },
         run: (action) => {
-          const ids = { find: 'actions.find', replace: 'editor.action.startFindReplaceAction', gotoLine: 'editor.action.gotoLine', undo: 'undo', redo: 'redo' } as const;
+          const ids = { find: 'actions.find', replace: 'editor.action.startFindReplaceAction', undo: 'undo', redo: 'redo' } as const;
           instance.focus();
           if (action === 'undo' || action === 'redo') instance.trigger('minv', action, null);
           else instance.getAction(ids[action])?.run();
@@ -136,7 +136,6 @@ export function themeFromTokens(style: CSSStyleDeclaration, highContrast: boolea
       'input.background': hex('sunken'),
       'input.border': hex('border'),
       'input.foreground': hex('fg'),
-      'inputOption.activeBorder': hex('focus'),
       'focusBorder': hex('focus'),
       'editor.findMatchBackground': hex('selection'),
       'editor.findMatchHighlightBackground': hex('selection') + '88',
@@ -150,6 +149,19 @@ export function themeFromTokens(style: CSSStyleDeclaration, highContrast: boolea
       'diffEditor.removedTextBackground': hex('deleted') + '33',
       'editorBracketMatch.background': hex('selection'),
       'editorBracketMatch.border': '#00000000',
+      'widget.shadow': '#00000000',
+      'widget.border': hex('border'),
+      'inputOption.activeBackground': hex('accent'),
+      'inputOption.activeForeground': hex('on-accent'),
+      'inputOption.activeBorder': '#00000000',
+      'toolbar.hoverBackground': hex('hover'),
+      'editor.findRangeHighlightBackground': hex('selection') + '55',
+      'menu.background': hex('surface'),
+      'menu.foreground': hex('fg'),
+      'menu.border': hex('border'),
+      'menu.selectionBackground': hex('hover'),
+      'menu.selectionForeground': hex('fg'),
+      'menu.separatorBackground': hex('line'),
     },
     tokens: [
       { token: '', foreground: strip(hex('fg')) },

@@ -36,13 +36,13 @@ export function createMasthead(app: App): { element: HTMLElement; render(state: 
     h('button', { class: 'close', 'aria-label': 'Close window', onclick: () => void app.call('window.close', undefined, true) }, close()));
   const brandMark = mark(); brandMark.classList.add('mark');
   const element = h('header', { class: 'masthead', ondblclick: (e: MouseEvent) => { if (e.target === element) void app.call('window.toggleMaximize', undefined, true); } },
-    h('div', { class: 'brand', title: 'Minv · Minimal VS Code' }, brandMark, h('span', { class: 'wordmark' }, 'minv'), h('span', { class: 'sep' }), name, root, fixture),
+    h('div', { class: 'brand', title: 'Minv · Browse. Review. Commit.' }, brandMark, h('span', { class: 'wordmark' }, 'minv'), h('span', { class: 'sep' }), name, root, fixture),
     goto, h('div', { class: 'bar-right' }, ledgerEl, controls));
   return {
     element,
     render(state) {
       const w = state.workspace;
-      text(name, w?.name ?? 'Minimal VS Code');
+      text(name, w?.name ?? 'Browse. Review. Commit.');
       text(root, w ? w.roots.join(' · ').replace(/^\/home\/[^/]+/, '~') : '');
       attr(fixture, 'hidden', !w?.fixture); text(fixture, w?.fixture ?? '');
       if (!w) { ledgerEl.replaceChildren(); return; }

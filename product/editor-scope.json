@@ -29,8 +29,7 @@
     "src/vs/editor/contrib/unicodeHighlighter/browser/unicodeHighlighter.ts",
     "src/vs/editor/contrib/unusualLineTerminators/browser/unusualLineTerminators.ts",
     "src/vs/editor/contrib/wordOperations/browser/wordOperations.ts",
-    "src/vs/editor/contrib/wordPartOperations/browser/wordPartOperations.ts",
-    "src/vs/editor/standalone/browser/quickAccess/standaloneGotoLineQuickAccess.ts"
+    "src/vs/editor/contrib/wordPartOperations/browser/wordPartOperations.ts"
   ],
   "sourceTransforms": [
     {

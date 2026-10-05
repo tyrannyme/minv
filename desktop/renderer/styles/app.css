@@ -1,4 +1,4 @@
-/* Minv Signal — Minimal VS Code. A monochrome instrument; colour only for meaning. See docs/DESIGN.md. */
+/* Minv Signal. A monochrome instrument; colour only for meaning. See docs/DESIGN.md. */
 
 @font-face { font-family: 'Instrument Sans'; src: url(../assets/fonts/instrument-sans-latin-standard-normal.woff2) format('woff2'); font-weight: 400 700; font-stretch: 75% 100%; font-style: normal; font-display: block; }
 @font-face { font-family: 'Instrument Sans'; src: url(../assets/fonts/instrument-sans-latin-standard-italic.woff2) format('woff2'); font-weight: 400 700; font-stretch: 75% 100%; font-style: italic; font-display: block; }
@@ -471,3 +471,51 @@ textarea.field { height: auto; padding: 10px 12px; resize: none; line-height: 1.
   .ledger { display: none; }
   .goto { width: 220px; }
 }
+
+/* Editor-owned widgets, redrawn in Signal: the find bar and the context menu. */
+.editor-host .monaco-editor .find-widget {
+  top: 10px; height: auto; min-height: 44px; padding: 6px 8px 6px 22px; border: 1px solid var(--border); border-radius: var(--radius-overlay);
+  background: var(--raised); box-shadow: var(--shadow); font-family: var(--font-ui); font-size: var(--text-small); color: var(--fg);
+  transform: translateY(calc(-100% - 20px));
+}
+.editor-host .monaco-editor .find-widget.visible { transform: translateY(0); }
+.editor-host .monaco-editor .find-widget > .button.toggle { width: 16px; left: 3px; top: 6px; bottom: 6px; height: auto; border-radius: 6px; }
+.editor-host .monaco-editor .find-widget .monaco-sash { display: none; }
+.editor-host .monaco-editor .find-widget .monaco-inputbox { border-radius: var(--radius-control); border-color: var(--line) !important; background: var(--sunken) !important; }
+.editor-host .monaco-editor .find-widget .monaco-inputbox.synthetic-focus { outline: 1px solid var(--focus); outline-offset: -1px; }
+.editor-host .monaco-editor .find-widget .monaco-inputbox .input { font-family: var(--font-code); font-size: var(--text-code); }
+.editor-host .monaco-editor .find-widget .matchesCount { font-family: var(--font-readout); font-stretch: 87.5%; font-size: 10.5px; color: var(--fg2); letter-spacing: .04em; text-transform: uppercase; }
+.editor-host .monaco-editor .find-widget .matchesCount.no-results { color: var(--deleted-text); }
+.editor-host .monaco-editor .find-widget .button,
+.editor-host .monaco-editor .find-widget .monaco-custom-toggle { border-radius: 6px; color: var(--fg2); }
+.editor-host .monaco-editor .find-widget .button:not(.disabled):hover,
+.editor-host .monaco-editor .find-widget .monaco-custom-toggle:hover { background: var(--hover) !important; color: var(--fg); }
+.editor-host .monaco-editor .find-widget .monaco-custom-toggle.checked { background: var(--accent) !important; color: var(--on-accent) !important; border-color: transparent !important; }
+.editor-host .monaco-editor .find-widget .codicon::before {
+  font-family: var(--font-readout); font-stretch: 87.5%; font-size: 10.5px; font-weight: 700; letter-spacing: .02em; line-height: 16px;
+}
+.editor-host .monaco-editor .find-widget .codicon { width: auto; min-width: 16px; padding: 0 2px; display: inline-flex; justify-content: center; }
+.editor-host .find-widget .codicon-case-sensitive::before { content: 'Aa'; }
+.editor-host .find-widget .codicon-whole-word::before { content: 'W'; }
+.editor-host .find-widget .codicon-regex::before { content: '.*'; }
+.editor-host .find-widget .codicon-preserve-case::before { content: 'AB'; }
+.editor-host .find-widget .codicon-find-previous-match::before { content: '↑'; font-family: var(--font-ui); font-size: 13px; }
+.editor-host .find-widget .codicon-find-next-match::before { content: '↓'; font-family: var(--font-ui); font-size: 13px; }
+.editor-host .find-widget .codicon-find-selection::before { content: 'SEL'; }
+.editor-host .find-widget .codicon-find-replace::before { content: 'ONE'; }
+.editor-host .find-widget .codicon-find-replace-all::before { content: 'ALL'; }
+.editor-host .find-widget .codicon-widget-close::before { content: '×'; font-family: var(--font-ui); font-size: 17px; font-weight: 400; }
+.editor-host .find-widget .codicon-find-collapsed::before { content: '›'; font-family: var(--font-ui); font-size: 14px; }
+.editor-host .find-widget .codicon-find-expanded::before { content: '›'; font-family: var(--font-ui); font-size: 14px; display: inline-block; transform: rotate(90deg); }
+
+.editor-host .monaco-menu-container .monaco-menu {
+  padding: 5px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface) !important; box-shadow: var(--shadow);
+  font-family: var(--font-ui); font-size: var(--text-small); color: var(--fg);
+}
+.editor-host .monaco-menu-container .monaco-scrollable-element { border-radius: 12px; box-shadow: none !important; }
+.editor-host .monaco-menu .monaco-action-bar.vertical .action-menu-item { height: 30px; border-radius: 7px; }
+.editor-host .monaco-menu .monaco-action-bar.vertical .action-menu-item:hover,
+.editor-host .monaco-menu .monaco-action-bar.vertical .action-item.focused .action-menu-item { background: var(--hover) !important; color: var(--fg) !important; outline: none !important; }
+.editor-host .monaco-menu .monaco-action-bar.vertical .action-label { padding: 0 10px; font-size: var(--text-small); }
+.editor-host .monaco-menu .monaco-action-bar.vertical .keybinding { font-family: var(--font-readout); font-stretch: 87.5%; font-size: 10.5px; color: var(--fg3); padding: 0 10px; }
+.editor-host .monaco-menu .monaco-action-bar.vertical .action-label.separator { border-bottom-color: var(--line) !important; margin: 4px 6px; }

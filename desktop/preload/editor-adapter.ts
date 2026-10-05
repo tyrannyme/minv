@@ -115,7 +115,7 @@ export function createEditorAdapter(module: LocalEditorModule): EditorAdapter {
     scrollbar: { verticalScrollbarSize: 10, horizontalScrollbarSize: 10, useShadows: false }, cursorBlinking: 'phase', cursorSmoothCaretAnimation: 'off',
     smoothScrolling: false, folding: !large, guides: { indentation: !large, highlightActiveIndentation: false }, bracketPairColorization: { enabled: false },
     quickSuggestions: false, suggestOnTriggerCharacters: false, wordBasedSuggestions: 'off', parameterHints: { enabled: false }, hover: { enabled: false }, links: false,
-    contextmenu: true, largeFileOptimizations: true, unicodeHighlight: { ambiguousCharacters: !large, invisibleCharacters: !large },
+    contextmenu: true, useShadowDOM: false, find: { addExtraSpaceOnTop: false, seedSearchStringFromSelection: 'selection' }, largeFileOptimizations: true, unicodeHighlight: { ambiguousCharacters: !large, invisibleCharacters: !large },
     ...(large ? { maxTokenizationLineLength: 0, renderValidationDecorations: 'off', matchBrackets: 'never', occurrencesHighlight: 'off' } : {}),
   });
 
@@ -188,7 +188,7 @@ export function createEditorAdapter(module: LocalEditorModule): EditorAdapter {
           instance.focus();
           if (action === 'undo' || action === 'redo') instance.trigger('minv', action, null);
           else {
-            const id = { find: 'actions.find', replace: 'editor.action.startFindReplaceAction', gotoLine: 'editor.action.gotoLine' }[action];
+            const id = { find: 'actions.find', replace: 'editor.action.startFindReplaceAction' }[action];
             const command = instance.getAction(id);
             if (!command) throw new Error(`Editor action is unavailable: ${action}`);
             void command.run();

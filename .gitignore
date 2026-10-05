@@ -3,7 +3,6 @@ dist/
 .upstream/
 .minv-dev/
 fixtures/
-*.vsix
 build/
 desktop/editor/generated/
 desktop/renderer/dist/

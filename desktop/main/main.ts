@@ -65,7 +65,7 @@ class WindowController {
     const saved = state.snapshot.bounds;
     const preferences = state.preferences;
     this.window = new BrowserWindow({
-      title: 'Minv — Minimal VS Code', width: saved?.width ?? 1440, height: saved?.height ?? 960,
+      title: 'Minv', width: saved?.width ?? 1440, height: saved?.height ?? 960,
       ...(saved?.x !== undefined && saved.y !== undefined ? { x: saved.x, y: saved.y } : {}),
       minWidth: 900, minHeight: 600, show: false, frame: false,
       backgroundColor: background,

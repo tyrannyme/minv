@@ -8,7 +8,7 @@ async function editor(): Promise<EditorAdapter | undefined> {
   try {
     const url = new URL('../../editor/generated/editor.js', import.meta.url).href;
     return createCodeOssAdapter(await import(url));
-  } catch (error) { console.error('Minv: Code-OSS editor unavailable', error); return undefined; }
+  } catch (error) { console.error('Minv: editor unavailable', error); return undefined; }
 }
 
 const host = window.minvHost;

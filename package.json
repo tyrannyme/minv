@@ -1,22 +1,17 @@
 {
   "name": "minv",
-  "displayName": "Minv",
-  "description": "Minimal VS Code. A standalone code browser, text editor and Git client built from Code-OSS.",
+  "description": "A desktop code browser, text editor and Git client for workspaces with dozens of repositories.",
   "version": "0.1.0",
   "private": true,
-  "publisher": "minv",
   "license": "MIT",
   "engines": {
-    "vscode": "^1.95.0",
     "node": ">=22"
   },
-  "main": "./dist/src/extension.js",
   "scripts": {
     "build": "node scripts/sandbox-build.mjs && tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.desktop.json && npm --prefix desktop/renderer run check",
     "test": "npm run build && node --test dist/test/*.test.js",
     "start": "node scripts/minv.mjs",
-    "start:prototype": "node scripts/launch.mjs",
     "desktop:build": "npm run build && node scripts/desktop-build.mjs",
     "build:desktop": "npm run desktop:build",
     "desktop:check": "tsc -p tsconfig.desktop.json",
@@ -28,12 +23,10 @@
     "upstream:prepare": "node scripts/prepare-upstream.mjs",
     "upstream:audit": "node scripts/upstream-audit.mjs",
     "fixture": "node scripts/fixture.mjs",
-    "bench": "npm run build && node scripts/bench.mjs",
-    "test:host": "npm run build && node scripts/host-smoke.mjs"
+    "bench": "npm run build && node scripts/bench.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "@types/vscode": "^1.95.0",
     "@vscode/codicons": "0.0.46-39",
     "@vscode/ripgrep-universal": "1.18.0",
     "electron": "44.5.1",
@@ -41,165 +34,5 @@
     "typescript": "^5.7.0",
     "vscode-oniguruma": "1.7.0",
     "vscode-textmate": "9.3.2"
-  },
-  "activationEvents": [
-    "onStartupFinished"
-  ],
-  "capabilities": {
-    "untrustedWorkspaces": {
-      "supported": "limited",
-      "description": "Branch inspection is available. Change/diff inspection and Git writes require workspace trust."
-    },
-    "virtualWorkspaces": false
-  },
-  "contributes": {
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "minv",
-          "title": "Minv",
-          "icon": "media/minv.svg"
-        }
-      ]
-    },
-    "colors": [
-      {
-        "id": "minv.modified",
-        "description": "Modified file state in Minv views.",
-        "defaults": {
-          "dark": "#d2b765",
-          "light": "#7f610c",
-          "highContrast": "#ffd75e",
-          "highContrastLight": "#5c4500"
-        }
-      },
-      {
-        "id": "minv.added",
-        "description": "Added file state in Minv views.",
-        "defaults": {
-          "dark": "#93bf85",
-          "light": "#3d7531",
-          "highContrast": "#9cf28b",
-          "highContrastLight": "#1f5a14"
-        }
-      },
-      {
-        "id": "minv.deleted",
-        "description": "Deleted file state in Minv views.",
-        "defaults": {
-          "dark": "#df7d72",
-          "light": "#ad3a2d",
-          "highContrast": "#ff8f80",
-          "highContrastLight": "#8c1d10"
-        }
-      },
-      {
-        "id": "minv.untracked",
-        "description": "Untracked file state in Minv views.",
-        "defaults": {
-          "dark": "#8fb0cf",
-          "light": "#2e5f8c",
-          "highContrast": "#9cd0ff",
-          "highContrastLight": "#0f3f6e"
-        }
-      },
-      {
-        "id": "minv.conflict",
-        "description": "Conflicted file state in Minv views.",
-        "defaults": {
-          "dark": "#d79bd0",
-          "light": "#8a3c84",
-          "highContrast": "#ffadf6",
-          "highContrastLight": "#6b1f66"
-        }
-      },
-      {
-        "id": "minv.pending",
-        "description": "Unverified or pending repository state in Minv views.",
-        "defaults": {
-          "dark": "descriptionForeground",
-          "light": "descriptionForeground",
-          "highContrast": "foreground",
-          "highContrastLight": "foreground"
-        }
-      }
-    ],
-    "views": {
-      "minv": [
-        {
-          "type": "webview",
-          "id": "minv.repositories",
-          "name": "Repositories"
-        }
-      ]
-    },
-    "commands": [
-      {
-        "command": "minv.refresh",
-        "title": "Refresh Selected Repository",
-        "category": "Minv",
-        "icon": "$(refresh)"
-      },
-      {
-        "command": "minv.refreshAll",
-        "title": "Refresh All Repositories",
-        "category": "Minv"
-      },
-      {
-        "command": "minv.openRepository",
-        "title": "Select Repository",
-        "category": "Minv"
-      },
-      {
-        "command": "minv.history",
-        "title": "Show Repository History",
-        "category": "Minv"
-      },
-      {
-        "command": "minv.stage",
-        "title": "Stage File",
-        "category": "Minv"
-      },
-      {
-        "command": "minv.unstage",
-        "title": "Unstage File",
-        "category": "Minv"
-      },
-      {
-        "command": "minv.commit",
-        "title": "Review and Commit",
-        "category": "Minv"
-      },
-      {
-        "command": "minv.diagnostics",
-        "title": "Show Diagnostics",
-        "category": "Minv"
-      },
-      {
-        "command": "minv.home",
-        "title": "Show Home",
-        "category": "Minv"
-      }
-    ],
-    "menus": {
-      "view/title": [
-        {
-          "command": "minv.refresh",
-          "when": "view == minv.repositories",
-          "group": "navigation"
-        }
-      ]
-    },
-    "configuration": {
-      "title": "Minv",
-      "properties": {
-        "minv.gitPath": {
-          "type": "string",
-          "default": "git",
-          "scope": "machine",
-          "description": "Git executable used for repository operations. Requires reloading the window."
-        }
-      }
-    }
   }
 }

@@ -260,7 +260,22 @@ function runElectronHarness() {
     assert(!sources.some(file => /(?:^|\/)(?:mock|mocks|fixtures|test|tests)(?:\/|\.)/.test(file)), 'Mock/test inputs reached the real desktop bundle.');
     observed.processes = app.getAppMetrics().map(metric => ({ type: metric.type, serviceName: metric.serviceName, name: metric.name }));
     assert(!observed.processes.some(item=>/extension.?host|agent.?host/i.test(`${item.name} ${item.serviceName}`)), 'Excluded process running.');
+    if (process.env.MINV_SMOKE_GALLERY) await gallery();
     await finish();
+  }
+
+  // Optional captures of editor-owned widgets, for visual review only.
+  async function gallery() {
+    const shot = async name => { await delay(300); writeFileSync(join(run, `${name}.png`), (await window.webContents.capturePage()).toPNG()); };
+    const view = `(await import('minv-app://app/editor/editor.js')).editor.getEditors().find(item=>!item.getRawOptions().readOnly)`;
+    await window.webContents.executeJavaScript(`(async()=>{const v=${view};v.focus();v.setSelection({startLineNumber:1,startColumn:14,endLineNumber:1,endColumn:21});await v.getAction('actions.find').run();})()`);
+    await shot('find');
+    await window.webContents.executeJavaScript(`(async()=>{const v=${view};v.trigger('gallery','closeFindWidget');await v.getAction('editor.action.startFindReplaceAction').run();})()`);
+    await shot('replace');
+    await window.webContents.executeJavaScript(`(async()=>{const v=${view};v.trigger('gallery','closeFindWidget');[...document.querySelectorAll('button')].find(b=>b.textContent==='Line').click();})()`);
+    await shot('goto-line');
+    await window.webContents.executeJavaScript(`(async()=>{document.querySelector('.dialog')?.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));const v=${view};const t=v.getDomNode().querySelector('.view-lines');const r=t.getBoundingClientRect();t.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,clientX:r.left+120,clientY:r.top+30,button:2}));})()`);
+    await shot('context-menu');
   }
 
   // Synchronous require registers schemes before Electron's ready event.
