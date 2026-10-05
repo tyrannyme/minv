@@ -1,58 +1,21 @@
-<p align="center">
-  <img alt="Minv. Every branch, at a glance. Browse. Review. Commit." src="docs/readme-assets/banner.png">
-</p>
+<h1 align="center"><img alt="" src="media/brand/minv.svg" width="64"><br>Minv</h1>
+
+<p align="center">VS Code, cut down to what you open it for.</p>
 
 <p align="center">
   <a href="https://github.com/tyrannyme/minv/actions/workflows/ci.yml"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/tyrannyme/minv/ci.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=dark"><img alt="CI status" src="https://shieldcn.dev/github/tyrannyme/minv/ci.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=light"></picture></a>
   <a href="https://github.com/tyrannyme/minv/releases"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/tyrannyme/minv/release.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=dark"><img alt="Latest release" src="https://shieldcn.dev/github/tyrannyme/minv/release.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=light"></picture></a>
-  <a href="docs/PACKAGING.md"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Linux-x64.svg?variant=outline&amp;size=sm&amp;font=geist&amp;logo=linux&amp;mode=dark"><img alt="Linux x64" src="https://shieldcn.dev/badge/Linux-x64.svg?variant=outline&amp;size=sm&amp;font=geist&amp;logo=linux&amp;mode=light"></picture></a>
-  <a href="docs/DESKTOP_ENGINEERING.md"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Electron-44.5.1.svg?variant=outline&amp;size=sm&amp;font=geist&amp;logo=electron&amp;mode=dark"><img alt="Electron 44.5.1" src="https://shieldcn.dev/badge/Electron-44.5.1.svg?variant=outline&amp;size=sm&amp;font=geist&amp;logo=electron&amp;mode=light"></picture></a>
-  <a href="docs/GIT_RUNTIME.md"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Git-2.48%2B.svg?variant=outline&amp;size=sm&amp;font=geist&amp;logo=git&amp;mode=dark"><img alt="Git 2.48 or newer" src="https://shieldcn.dev/badge/Git-2.48%2B.svg?variant=outline&amp;size=sm&amp;font=geist&amp;logo=git&amp;mode=light"></picture></a>
+  <a href="fork/upstream.json"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Code--OSS-1.137.0.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=dark"><img alt="Based on Code-OSS 1.137.0" src="https://shieldcn.dev/badge/Code--OSS-1.137.0.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=light"></picture></a>
   <a href="LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/license-MIT.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=dark"><img alt="MIT license" src="https://shieldcn.dev/badge/license-MIT.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=light"></picture></a>
 </p>
 
-<p align="center">A desktop code browser, editor and Git client for workspaces with dozens of repositories.</p>
+<p align="center"><img alt="Minv with Source Control open: every submodule's branch in the Repositories list, the parent's changes and graph, and a README beside its rendered preview" src="docs/readme-assets/minv.png"></p>
 
-> A small question about your code must never wait for the entire workspace.
+When your agents do the work, you still open an editor now and then: to read a file, look at the changes, commit, check which branch a submodule is on, or read and edit a README. Minv is VS Code with everything else taken out, so it opens fast and stays quiet.
 
-Open a workspace with forty submodules and ask which branch one of them is on. Minv answers from a stable repository list. It doesn't wait for every working-tree status, and rows don't move while information arrives.
+**What's in it:** the Explorer, Quick Open, search, the editor, the integrated terminal, and Source Control with VS Code's own Git (staging, commits, branches, push and pull, the graph). It also renders Markdown previews. Every submodule's branch shows in the Repositories list, and all 48 submodules of a large workspace open by default.
 
-Minv is a standalone desktop app with its own window, its own Git engine and a source-built text editor. There's no workbench, no extension host, and no AI. Use your agents, terminals, and IDEs next to it.
-
-<p align="center">
-  <img alt="The Minv desktop window: a repository list on the left, the selected repository's staged and unstaged changes in the middle, and the editor on the right" src="docs/readme-assets/minv-desktop.png">
-</p>
-
-<p align="center"><sub>Not a mockup. This is the Linux x64 development build, captured by <a href="scripts/desktop-smoke.mjs"><code>scripts/desktop-smoke.mjs</code></a> against a throwaway workspace with submodules.</sub></p>
-
-## Why it's different
-
-**Branches first.** Each repository row gets its branch from its own metadata read, with a reserved process slot. A slow status scan in one checkout never blocks the branch answer in another. Rows keep their place while discovery streams in, and missing or broken checkouts fail on their own row.
-
-**Reads are confined by the kernel.** Passive Git runs inside a small native launcher that uses Landlock and seccomp. Git can read your repository. It can't write files, open sockets, or run another program. That means no hooks, filters, credential helpers, or pagers. If a read needs a repository-defined filter, Minv reports that it can't answer instead of guessing.
-
-**Writes are explicit and scoped.** The Git service stages hunks, commits, branches, stashes, fetches, pulls (fast-forward only), and pushes, one repository at a time. Every write carries a token tied to the exact diff or status you were looking at. If HEAD, the index, or the file changed since then, the write is refused and Minv shows you what moved. Trusted writes use your real Git, so your hooks, signing, and filters still apply. There's no force push, hard reset, `clean`, or automatic stage-all.
-
-**Your work survives.** Saves compare against the version you opened and never overwrite another tool's edit. Unsaved buffers are kept as recovery drafts. Discard and delete make a backup first, and you can restore from it.
-
-**Local by default.** Passive Git can't open sockets or lazily fetch objects, so opening and inspecting a workspace doesn't start network traffic. Fetch, pull, and push only run when you ask. Search uses a bundled, pinned ripgrep. There's no telemetry, auto-update, or remote asset.
-
-**Deliberately left out:** AI chat and completions, MCP and agent sessions, debugging, tasks, notebooks, the integrated terminal, the extension marketplace, accounts and sync, and GitHub-specific integrations. They're removed from the build, not hidden behind settings. Plain Git remotes still work with your existing credentials.
-
-## Status
-
-> [!IMPORTANT]
-> **Minv is a development build.** Tagged builds are published on [Releases](https://github.com/tyrannyme/minv/releases) as unsigned Linux x64 archives. The desktop app boots with the source-built editor, the custom shell, and live Git. Release validation is still in progress, and every PRD requirement and release gate is still open. [docs/COMPLETION.md](docs/COMPLETION.md) tracks each one with its evidence.
-
-| Piece | Where it stands |
-| --- | --- |
-| Editor | Built from Code-OSS `1.137.0` source with a reviewed, audited input closure. Its sandboxed Electron smoke test passes. |
-| Desktop shell | Boots against a live multi-repository Git workspace. Runs sandboxed, with context isolation and a local-only protocol. The latest packaged-app smoke run ([`scripts/desktop-smoke.mjs`](scripts/desktop-smoke.mjs)) passes. |
-| Passive Git sandbox | Landlock and seccomp confinement, with adversarial tests on Linux. |
-| Packaging | The Linux x64 packaging script and audit exist. The archive isn't signed, and there's no updater. |
-| Performance | On a real 49-repository workspace (48 submodules), every branch is verified about 2.7 s after launch and every status about 3.4 s after (warm disk, [`scripts/desktop-capture.mjs`](scripts/desktop-capture.mjs)). The PRD's controlled budgets **have not been measured** yet. |
-
-Only Linux x64 is targeted. Windows and macOS aren't built.
+**What's taken out:** debugging, testing, AI chat and agents, inline completions, the integrated browser, accounts and settings sync, remote development, the extension marketplace, notebooks, language servers, welcome pages and surveys. There's no telemetry.
 
 ## Install
 
@@ -62,63 +25,40 @@ Download `minv-<version>-linux-x64.tar.gz` from [Releases](https://github.com/ty
 minv-<version>-linux-x64/bin/minv /path/to/workspace
 ```
 
-You need Linux x64 with kernel 6.12 or newer and Git 2.48 or newer. Everything else ships in the archive. [docs/PACKAGING.md](docs/PACKAGING.md) covers adding it to your PATH and app launcher.
+Linux x64 only for now. Minv keeps its settings in `~/.config/Minv` and `~/.minv`, separate from VS Code's.
 
-## Build and run
+## Build
 
-You need Linux x64 with kernel 6.12 or newer (Landlock ABI 6) and seccomp user notifications, Git 2.48 or newer, a C compiler with Linux headers, and Node.js 22 or newer with npm. The pinned Code-OSS source expects Node.js 24.18.0 for the editor build.
-
-```sh
-npm ci
-npm run upstream:fetch                 # fetch the pinned Code-OSS source into .upstream/
-npm run desktop:build                  # sandbox helper, editor (if its audit fails), renderer, and app
-npm start -- /path/to/workspace        # launch the built app with the local Electron
-```
-
-`npm start` runs [`scripts/minv.mjs`](scripts/minv.mjs), the same CLI as the packaged `bin/minv`:
+You need Node.js 24.18.0, Git, a C/C++ toolchain, and the X11 keyboard, libsecret and Kerberos development headers (`libxkbfile-devel libsecret-devel krb5-devel` on Fedora, `libxkbfile-dev libsecret-1-dev libkrb5-dev` on Debian and Ubuntu).
 
 ```sh
-npm start -- --repo /path/to/repository
-npm start -- --goto src/example.ts:42:5
-npm start -- --diff before.txt after.txt
-npm start -- --help
+npm run setup      # fetch the pinned Code-OSS source, apply Minv's changes, install its dependencies
+npm run compile    # development build
+npm start -- /path/to/workspace
+npm run build      # minified app in .upstream/VSCode-linux-x64
+npm run package    # build/release/minv-<version>-linux-x64.tar.gz
 ```
 
-### Check it
+`npm run capture -- <workspace> out.png --app=.upstream/VSCode-linux-x64/minv` opens the app in a private Xvfb display and screenshots it, so nothing appears on your desktop.
 
-```sh
-npm test                                # core Git, catalog, file, and sandbox tests in temporary repositories
-npm run check                           # type-check core, desktop, and renderer
-npm run editor:audit                    # verify the editor build against its reviewed source closure
-npm run editor:test                     # sandboxed Electron smoke test of the editor
-node scripts/desktop-smoke.mjs          # boot the real app against a disposable workspace and take a screenshot
-```
+## How the fork works
 
-The desktop smoke test writes `build/desktop/smoke.json` and `smoke.png`. It uses `xvfb-run` when it's installed.
+Minv's changes to Code-OSS live in [`fork/`](fork). [`scripts/fork-prepare.mjs`](scripts/fork-prepare.mjs) applies them to a pristine checkout of the pinned upstream commit every time, so the fork never drifts:
 
-### Package
-
-```sh
-npm run desktop:package                 # build/release/minv-<version>-linux-x64 plus a .tar.gz
-node scripts/package-desktop.mjs --audit build/release/minv-0.1.0-linux-x64
-```
-
-The package bundles Electron, the sandbox helper, and ripgrep. It doesn't need a system Node.js. Git isn't bundled. See [docs/PACKAGING.md](docs/PACKAGING.md) for per-user install and checksums.
-
-No step downloads and runs a remote package. Everything uses the tools `npm ci` installed.
-
-## Docs
-
-| Document | What it covers |
+| File | What it changes |
 | --- | --- |
-| [MINV_PRD.md](MINV_PRD.md) | Product requirements, rules, budgets, and release gates |
-| [docs/COMPLETION.md](docs/COMPLETION.md) | Each requirement's status and evidence |
-| [docs/DESKTOP_ENGINEERING.md](docs/DESKTOP_ENGINEERING.md) | Process boundaries and ownership |
-| [docs/EDITOR_BUILD.md](docs/EDITOR_BUILD.md) | The source-built editor, provenance, and exclusions |
-| [docs/GIT_RUNTIME.md](docs/GIT_RUNTIME.md) | The passive Git sandbox and scheduling |
-| [docs/PACKAGING.md](docs/PACKAGING.md) | Linux packaging, the CLI, and installation |
-| [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Building, testing, capturing, and releasing |
+| [`fork/upstream.json`](fork/upstream.json) | The exact Code-OSS commit Minv is built from |
+| [`fork/strip.json`](fork/strip.json) | Workbench features that aren't registered |
+| [`fork/extensions-remove.json`](fork/extensions-remove.json) | Built-in extensions that aren't shipped |
+| [`fork/product.json`](fork/product.json) | Name, data folders, and default settings |
+| [`fork/extensions/minv-theme`](fork/extensions/minv-theme) | Minv Dark and Minv Light |
+| [`fork/overlay`](fork/overlay) | Icons and the bundled Instrument Sans and Commit Mono fonts |
+| [`fork/patches`](fork/patches) | Small source patches, each one commented |
+
+VS Code's chat and MCP services stay registered, though nothing uses them, because Tasks and the terminal depend on them. `chat.disableAIFeatures` is on, and every AI view, command and extension is removed.
+
+Pushing a tag `v<version>` that matches `package.json` builds, smoke-tests and publishes a release.
 
 ## License
 
-[MIT](LICENSE). The bundled Code-OSS editor keeps Microsoft's upstream MIT license and notices, and other third-party notices ship with the package. Minv isn't built from Microsoft's branded VS Code binaries and doesn't use the Visual Studio Marketplace.
+[MIT](LICENSE). Minv is built from Microsoft's MIT-licensed [Code-OSS](https://github.com/microsoft/vscode) source, not from the Visual Studio Code product, and doesn't use the Visual Studio Marketplace. The bundled fonts are under the SIL Open Font License.

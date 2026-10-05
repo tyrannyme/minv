@@ -12,7 +12,7 @@
     "setup": "node scripts/fork-prepare.mjs && cd .upstream/build && npm ci --no-audit --no-fund",
     "compile": "node scripts/fork-prepare.mjs && cd .upstream/build && npm run compile-client && npm run electron",
     "start": ".upstream/build/scripts/code.sh",
-    "build": "node scripts/fork-prepare.mjs && cd .upstream/build && npm run gulp vscode-linux-x64-min",
+    "build": "node scripts/fork-prepare.mjs && BUILD_SOURCEVERSION=$(git rev-parse HEAD) && cd .upstream/build && BUILD_SOURCEVERSION=$BUILD_SOURCEVERSION npm run gulp vscode-linux-x64-min",
     "package": "node scripts/fork-package.mjs",
     "capture": "node scripts/fork-capture.mjs"
   }

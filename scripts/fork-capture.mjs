@@ -51,32 +51,45 @@ try {
   await new Promise((done, fail) => { socket.onopen = done; socket.onerror = fail; });
   let id = 0; const pending = new Map();
   const problems = [];
+  const caught = [];
+  const urls = new Map();
   socket.onmessage = event => {
     const message = JSON.parse(event.data);
     if (message.method === 'Runtime.exceptionThrown') problems.push(message.params.exceptionDetails.exception?.description ?? message.params.exceptionDetails.text);
     if (message.method === 'Runtime.consoleAPICalled' && message.params.type === 'error') problems.push(message.params.args.map(arg => arg.value ?? arg.description).join(' '));
+    if (message.method === 'Network.requestWillBeSent') urls.set(message.params.requestId, message.params.request.url);
+    if (message.method === 'Network.loadingFailed') caught.push(`Failed to load ${urls.get(message.params.requestId)}: ${message.params.errorText}`);
+    if (message.method === 'Debugger.paused') {
+      const frames = message.params.callFrames.slice(0, 4).map(f => `${f.functionName || '?'} ${f.url.split('/').pop()}:${f.location.lineNumber + 1}:${f.location.columnNumber + 1}`);
+      caught.push(`${message.params.data?.description?.split('\n')[0] ?? message.params.reason}\n    ${frames.join('\n    ')}`);
+      socket.send(JSON.stringify({ id: ++id, method: 'Debugger.resume' }));
+    }
     pending.get(message.id)?.(message); pending.delete(message.id);
   };
   const send = (method, params = {}) => new Promise(done => { const n = ++id; pending.set(n, done); socket.send(JSON.stringify({ id: n, method, params })); });
   const evaluate = async expression => (await send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true })).result?.result?.value;
-  if (process.argv.includes('--debug')) { await send('Runtime.enable'); await send('Page.reload', { ignoreCache: true }); await delay(1000); }
+  await send('Runtime.enable');
+  if (process.argv.includes('--debug')) { await send('Page.reload', { ignoreCache: true }); await delay(1000); }
   for (let i = 0; i < 300 && !(await evaluate(`!!document.querySelector('.monaco-workbench .part.sidebar')`)); i++) await delay(100);
   console.log(`Workbench painted after ${Date.now() - started} ms`);
   await delay(wait);
+  // --exceptions records every exception thrown (even caught ones) while the keys are pressed.
+  if (process.argv.includes('--exceptions')) { await send('Network.enable'); await send('Debugger.enable'); await send('Debugger.setPauseOnExceptions', { state: 'all' }); }
   // --keys=ctrl+shift+v,escape presses each chord in order, one second apart.
   for (const chord of (option('keys') ?? '').split(',').filter(Boolean)) {
     const parts = chord.toLowerCase().split('+'); const key = parts.pop();
     const modifiers = (parts.includes('alt') ? 1 : 0) | (parts.includes('ctrl') ? 2 : 0) | (parts.includes('meta') ? 4 : 0) | (parts.includes('shift') ? 8 : 0);
-    const named = { escape: ['Escape', 27], enter: ['Enter', 13], tab: ['Tab', 9] }[key];
+    const named = { escape: ['Escape', 27], enter: ['Enter', 13], tab: ['Tab', 9], backquote: ['`', 192, 'Backquote'] }[key];
     const code = named ? named[1] : key.toUpperCase().charCodeAt(0);
     const keyName = named ? named[0] : key;
-    const codeName = named ? named[0] : /[a-z]/.test(key) ? `Key${key.toUpperCase()}` : `Digit${key}`;
+    const codeName = named ? (named[2] ?? named[0]) : /[a-z]/.test(key) ? `Key${key.toUpperCase()}` : `Digit${key}`;
     for (const type of ['rawKeyDown', 'keyUp']) await send('Input.dispatchKeyEvent', { type, modifiers, key: keyName, code: codeName, windowsVirtualKeyCode: code, nativeVirtualKeyCode: code });
     await delay(1000);
   }
   if (option('keys')) await delay(Number(option('after') ?? 3000));
+  if (caught.length) { await send('Debugger.setPauseOnExceptions', { state: 'none' }); console.log(`Exceptions during keys:\n${caught.slice(0, 20).join('\n')}`); }
   if (option('eval')) console.log('eval:', JSON.stringify(await evaluate(option('eval'))));
-  if (problems.length) console.log(`Renderer problems:\n${[...new Set(problems)].slice(0, 15).map(p => String(p).slice(0, 600)).join('\n---\n')}`);
+  if (problems.length) console.log(`Renderer problems:\n${[...new Set(problems)].filter(p => !/depends on UNKNOWN service|NOT registered|Cannot instantiate named customer/.test(p)).slice(0, 15).map(p => String(p).slice(0, 900)).join('\n---\n')}`);
   const shot = await send('Page.captureScreenshot', { format: 'png' });
   writeFileSync(out, Buffer.from(shot.result.data, 'base64'));
   console.log(`Captured ${out}`);
@@ -91,4 +104,5 @@ try {
   // Surface the workbench's own error log, which is where missing services and failed contributions land.
   const logs = spawnSync('sh', ['-c', `grep -rhE "\\[error\\]" ${JSON.stringify(join(profile, 'data/logs'))} 2>/dev/null | sort | uniq -c | sort -rn | head -40`], { encoding: 'utf8' }).stdout;
   if (logs.trim()) console.log(`Workbench errors:\n${logs}`);
+  if (process.argv.includes('--log')) console.log(`App output:\n${log.slice(-6000)}`);
 }

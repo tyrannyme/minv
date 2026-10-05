@@ -54,6 +54,8 @@ jobs:
 
       - name: Build
         working-directory: .upstream/build
+        env:
+          BUILD_SOURCEVERSION: ${{ github.sha }}
         run: npm run gulp vscode-linux-x64-min
 
       - name: Smoke test
