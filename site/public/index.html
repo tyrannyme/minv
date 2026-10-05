@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minv: VS Code, minus everything you never open</title>
+  <meta name="description" content="Minv is VS Code cut down to reading files, reviewing changes, committing and checking submodule branches. No debugger, no AI, no telemetry. Free and open source for Linux.">
+  <meta name="theme-color" content="#0a0b0d">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://minv.tyranny.me/">
+  <meta property="og:title" content="Minv: VS Code, minus everything you never open">
+  <meta property="og:description" content="Read a file, review the changes, commit, check a submodule's branch. Nothing else. Free and open source for Linux.">
+  <meta property="og:image" content="https://minv.tyranny.me/img/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preload" href="/fonts/instrument-sans-latin-standard-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="nav">
+    <a class="logo" href="/" aria-label="Minv home"><img src="/favicon.svg" alt="" width="26" height="26"><span>minv</span></a>
+    <nav aria-label="Sections">
+      <a href="#tour">Tour</a>
+      <a href="#out">What's out</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/tyrannyme/minv">GitHub</a>
+    </nav>
+    <a class="button small" href="#install" data-download>Download</a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="kicker"><span class="dot"></span><span data-version>v0.1.0</span> · Linux x64 · free and open source</p>
+      <h1>VS Code, minus everything you <em>never open</em>.</h1>
+      <p class="lead">Your agents write the code. You still need to read a file, review the changes, commit, and check which branch a submodule is on. Minv is VS Code cut down to exactly that, so it opens fast and stays quiet.</p>
+      <div class="ctas">
+        <a class="button" href="#install" data-download>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download for Linux
+        </a>
+        <a class="button ghost" href="https://github.com/tyrannyme/minv">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.1-1.46-1.1-1.46-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>
+          View the source
+        </a>
+      </div>
+      <p class="fineprint" data-platform-note>One 168 MB download. Needs Linux x64 and Git.</p>
+
+      <figure class="shot hero-shot">
+        <div class="frame">
+          <img src="/img/scm-diff.webp" width="2000" height="1250" alt="Minv with Source Control open. The Repositories list shows eight submodules and their branches, the renderer submodule's change is selected, and a side-by-side diff of stream.ts fills the editor.">
+        </div>
+        <figcaption>Every submodule's branch, the selected repo's changes, and the diff. That's the whole job.</figcaption>
+      </figure>
+    </section>
+
+    <section class="stats" aria-label="At a glance">
+      <div><b>0.9 s</b><span>from launch to a restored window, cold</span></div>
+      <div><b>48 / 48</b><span>submodules opened with their branches. VS Code stops at 10.</span></div>
+      <div><b>0</b><span>AI features, accounts, or telemetry</span></div>
+      <div><b>100%</b><span>VS Code's editor, Git, terminal and shortcuts</span></div>
+    </section>
+
+    <section class="tour" id="tour">
+      <div class="section-head">
+        <p class="label">What you open it for</p>
+        <h2>Open it, glance, close it.</h2>
+      </div>
+      <div class="tabs" role="tablist" aria-label="What Minv is for">
+        <button role="tab" aria-selected="true" aria-controls="panel-changes" id="tab-changes">Review changes</button>
+        <button role="tab" aria-selected="false" aria-controls="panel-branches" id="tab-branches">Check branches</button>
+        <button role="tab" aria-selected="false" aria-controls="panel-readme" id="tab-readme">Preview a README</button>
+        <button role="tab" aria-selected="false" aria-controls="panel-files" id="tab-files">Read a file</button>
+      </div>
+      <div class="panels">
+        <article class="panel" role="tabpanel" id="panel-changes" aria-labelledby="tab-changes">
+          <div class="copy">
+            <h3>See exactly what your agent changed.</h3>
+            <p>VS Code's own Source Control, untouched: side-by-side diffs, staging by hunk, a commit box, the graph, push and pull. Pick a submodule and its changes are right there.</p>
+            <ul class="keys"><li><kbd>Ctrl</kbd><kbd>⇧</kbd><kbd>G</kbd> Source Control</li><li><kbd>Ctrl</kbd><kbd>⏎</kbd> Commit</li></ul>
+          </div>
+          <div class="shot"><div class="frame"><img src="/img/scm-diff.webp" width="2000" height="1250" loading="lazy" alt="A side-by-side diff in Minv"></div></div>
+        </article>
+        <article class="panel" role="tabpanel" id="panel-branches" aria-labelledby="tab-branches" hidden>
+          <div class="copy">
+            <h3>Which branch is that submodule on?</h3>
+            <p>The Repositories list is on by default and shows every submodule with its branch. Minv opens up to 256 of them where VS Code stops at 10, so large workspaces just work.</p>
+            <ul class="keys"><li>Feature branches stand out at a glance</li><li>A <code>*</code> marks uncommitted work</li></ul>
+          </div>
+          <div class="shot narrow"><div class="frame"><img src="/img/branches.webp" width="600" height="780" loading="lazy" alt="The Repositories list with eight submodules on main, feat/streaming, fix/keepalive and release/2.4"></div></div>
+        </article>
+        <article class="panel" role="tabpanel" id="panel-readme" aria-labelledby="tab-readme" hidden>
+          <div class="copy">
+            <h3>Read the README the way GitHub will show it.</h3>
+            <p>Markdown renders beside the source with images, tables and code, and updates as you type. Fix the typo and commit without leaving the window.</p>
+            <ul class="keys"><li><kbd>Ctrl</kbd><kbd>K</kbd> <kbd>V</kbd> Preview to the side</li></ul>
+          </div>
+          <div class="shot"><div class="frame"><img src="/img/markdown.webp" width="2000" height="1250" loading="lazy" alt="A README beside its rendered Markdown preview in Minv"></div></div>
+        </article>
+        <article class="panel" role="tabpanel" id="panel-files" aria-labelledby="tab-files" hidden>
+          <div class="copy">
+            <h3>Find the file. Read it. Run one command.</h3>
+            <p>The Explorer, Quick Open, search across files, and the integrated terminal, all where your hands expect them.</p>
+            <ul class="keys"><li><kbd>Ctrl</kbd><kbd>P</kbd> Open a file</li><li><kbd>Ctrl</kbd><kbd>⇧</kbd><kbd>F</kbd> Search</li><li><kbd>Ctrl</kbd><kbd>`</kbd> Terminal</li></ul>
+          </div>
+          <div class="shot"><div class="frame"><img src="/img/terminal.webp" width="2000" height="1250" loading="lazy" alt="Minv with a TypeScript file open in the editor and the terminal listing every submodule's branch"></div></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="out" id="out">
+      <div class="section-head">
+        <p class="label">Taken out, not hidden</p>
+        <h2>Everything you used to dodge is gone.</h2>
+        <p class="sub">No buttons to ignore, no panels to close, no sign-in nags. These are removed from the build, not tucked behind settings.</p>
+      </div>
+      <ul class="gone">
+        <li>Debugger</li><li>Run and debug</li><li>Testing</li><li>AI chat</li><li>Agents window</li><li>Inline completions</li>
+        <li>Integrated browser</li><li>Accounts</li><li>Settings sync</li><li>Remote development</li><li>Extension marketplace</li>
+        <li>Notebooks</li><li>Language servers</li><li>Copilot</li><li>Welcome pages</li><li>Surveys</li><li>Telemetry</li>
+      </ul>
+      <div class="kept">
+        <p class="label">Still there</p>
+        <ul>
+          <li>Explorer</li><li>Quick Open</li><li>Search</li><li>Editor</li><li>Source Control and Git graph</li><li>Diff and merge editors</li><li>Markdown preview</li><li>Terminal</li><li>Your <code>settings.json</code> and keybindings</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="themes">
+      <div class="section-head">
+        <p class="label">Minv Dark and Minv Light</p>
+        <h2>Charcoal and lime. Or daylight.</h2>
+        <p class="sub">Interface in Instrument Sans, code in Commit Mono, both bundled. Drag to compare.</p>
+      </div>
+      <div class="compare" style="--split: 50%">
+        <img src="/img/scm-diff.webp" width="2000" height="1250" loading="lazy" alt="Minv Dark">
+        <img class="top" src="/img/light.webp" width="2000" height="1250" loading="lazy" alt="Minv Light">
+        <div class="handle" aria-hidden="true"></div>
+        <input type="range" min="0" max="100" value="50" aria-label="Compare Minv Dark and Minv Light">
+      </div>
+    </section>
+
+    <section class="built">
+      <div class="section-head">
+        <p class="label">How it's made</p>
+        <h2>A pinned Code-OSS commit and one small folder of changes.</h2>
+        <p class="sub">No long-lived fork drifting away from upstream. Every build starts from Microsoft's MIT-licensed Code-OSS source at a pinned commit and applies the same changes, in CI, from scratch.</p>
+      </div>
+      <pre class="tree"><code><b>fork/</b>
+  upstream.json          <i>Code-OSS 1.137.0, pinned to one commit</i>
+  strip.json             <i>features that are never registered</i>
+  extensions-remove.json <i>built-in extensions that aren't shipped</i>
+  product.json           <i>name, data folders, quiet defaults</i>
+  extensions/minv-theme  <i>Minv Dark and Minv Light</i>
+  patches/               <i>eight small, commented patches</i></code></pre>
+    </section>
+
+    <section class="install" id="install">
+      <div class="section-head">
+        <p class="label">Install</p>
+        <h2>Three commands. Nothing to sign into.</h2>
+      </div>
+      <div class="terminal">
+        <div class="bar"><span></span><span></span><span></span><button class="copy" type="button">Copy</button></div>
+        <pre><code data-install><span class="p">$</span> curl -LO https://github.com/tyrannyme/minv/releases/download/v0.1.0/minv-0.1.0-linux-x64.tar.gz
+<span class="p">$</span> tar xzf minv-0.1.0-linux-x64.tar.gz
+<span class="p">$</span> ./minv-0.1.0-linux-x64/bin/minv ~/your/workspace</code></pre>
+      </div>
+      <div class="ctas center">
+        <a class="button" data-download-direct href="https://github.com/tyrannyme/minv/releases/download/v0.1.0/minv-0.1.0-linux-x64.tar.gz">Download minv-0.1.0-linux-x64.tar.gz</a>
+        <a class="button ghost" href="https://github.com/tyrannyme/minv/releases">All releases and checksums</a>
+      </div>
+      <p class="fineprint center">Linux x64 with Git installed. Settings live in <code>~/.config/Minv</code>, apart from VS Code's. Unsigned development build.</p>
+    </section>
+  </main>
+
+  <footer>
+    <div><img src="/favicon.svg" alt="" width="20" height="20"> <b>minv</b> · MIT · built from <a href="https://github.com/microsoft/vscode">Code-OSS</a></div>
+    <div class="muted">Not affiliated with Microsoft. Visual Studio Code is a trademark of Microsoft.</div>
+    <div><a href="https://github.com/tyrannyme/minv">GitHub</a> · <a href="https://github.com/tyrannyme/minv/issues">Report an issue</a></div>
+  </footer>
+
+  <script src="/main.js" defer></script>
+</body>
+</html>

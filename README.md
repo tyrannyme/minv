@@ -1,6 +1,6 @@
 <h1 align="center"><img alt="" src="media/brand/minv.svg" width="64"><br>Minv</h1>
 
-<p align="center">VS Code, cut down to what you open it for.</p>
+<p align="center">VS Code, cut down to what you open it for.<br><a href="https://minv.tyranny.me"><b>minv.tyranny.me</b></a></p>
 
 <p align="center">
   <a href="https://github.com/tyrannyme/minv/actions/workflows/ci.yml"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/tyrannyme/minv/ci.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=dark"><img alt="CI status" src="https://shieldcn.dev/github/tyrannyme/minv/ci.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=light"></picture></a>
@@ -39,7 +39,9 @@ npm run build      # minified app in .upstream/VSCode-linux-x64
 npm run package    # build/release/minv-<version>-linux-x64.tar.gz
 ```
 
-`npm run capture -- <workspace> out.png --app=.upstream/VSCode-linux-x64/minv` opens the app in a private Xvfb display and screenshots it, so nothing appears on your desktop.
+`npm run capture -- <workspace> out.png --app=.upstream/VSCode-linux-x64/minv` opens the app in a private Xvfb display and screenshots it, so nothing appears on your desktop. It can also click rows, press keys and type (`--click`, `--keys`, `--type`).
+
+The landing page lives in [`site/`](site). Deploy it with `cd site && wrangler deploy`.
 
 ## How the fork works
 

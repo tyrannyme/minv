@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Launches the Code-OSS fork from .upstream/build in a private Xvfb display with a throwaway profile,
 // waits, and captures the window through the DevTools protocol. Nothing opens on the real desktop.
-// Usage: node scripts/fork-capture.mjs <workspace> [out.png] [--app=packaged/minv] [--open=file] [--keys=ctrl+k,v] [--wait=ms] [--eval=js] [--debug]
+// Usage: node scripts/fork-capture.mjs <workspace> [out.png] [--app=packaged/minv] [--open=file] [--keys=ctrl+k,v]
+//   [--click=row;row] [--type=text] [--scale=2] [--settings=json] [--wait=ms] [--eval=js] [--exceptions] [--log] [--debug]
 import { spawn, spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -27,9 +28,9 @@ const env = { ...process.env, VSCODE_SKIP_PRELAUNCH: '1' };
 for (const name of ['ELECTRON_RUN_AS_NODE', 'WAYLAND_DISPLAY']) delete env[name];
 const started = Date.now();
 const opened = option('open') ? [resolve(workspace, option('open'))] : [];
-const child = spawn(xvfb, ['-a', '--server-args=-screen 0 1600x1000x24', option('app') ? resolve(option('app')) : join(source, 'scripts/code.sh'), workspace, ...opened,
+const child = spawn(xvfb, ['-a', `--server-args=-screen 0 ${Math.ceil(1600 * Number(option('scale') ?? 1))}x${Math.ceil(1000 * Number(option('scale') ?? 1))}x24`, option('app') ? resolve(option('app')) : join(source, 'scripts/code.sh'), workspace, ...opened,
   '--user-data-dir', join(profile, 'data'), '--extensions-dir', join(profile, 'extensions'), `--remote-debugging-port=${port}`,
-  ...(process.env.MINV_FORK_ARGS ? process.env.MINV_FORK_ARGS.split(' ') : []), '--disable-workspace-trust', '--skip-welcome', '--skip-release-notes', '--ozone-platform=x11', '--force-device-scale-factor=1'],
+  ...(process.env.MINV_FORK_ARGS ? process.env.MINV_FORK_ARGS.split(' ') : []), '--disable-workspace-trust', '--skip-welcome', '--skip-release-notes', '--ozone-platform=x11', `--force-device-scale-factor=${option('scale') ?? 1}`],
   { cwd: source, env, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
 let log = '';
 child.stdout.on('data', d => { log += d; }); child.stderr.on('data', d => { log += d; });
@@ -86,7 +87,24 @@ try {
     for (const type of ['rawKeyDown', 'keyUp']) await send('Input.dispatchKeyEvent', { type, modifiers, key: keyName, code: codeName, windowsVirtualKeyCode: code, nativeVirtualKeyCode: code });
     await delay(1000);
   }
-  if (option('keys')) await delay(Number(option('after') ?? 3000));
+  // --click=text1;text2 clicks, in order, the visible list row or tab whose text starts with each entry.
+  for (const target of (option('click') ?? '').split(';').filter(Boolean)) {
+    const box = await evaluate(`(() => {
+      const want = ${JSON.stringify(target)};
+      const nodes = [...document.querySelectorAll('.monaco-list-row, .tab, .action-item a, .monaco-button')];
+      const visible = nodes.filter(n => n.offsetParent);
+      const hit = visible.find(n => (n.textContent ?? '').trim().startsWith(want)) ?? visible.find(n => (n.getAttribute('aria-label') ?? '').startsWith(want));
+      if (!hit) return null;
+      const r = hit.getBoundingClientRect();
+      return { x: r.left + Math.min(r.width / 2, 60), y: r.top + r.height / 2 };
+    })()`);
+    if (!box) { console.log(`click: nothing matches ${target}`); continue; }
+    for (const type of ['mousePressed', 'mouseReleased']) await send('Input.dispatchMouseEvent', { type, x: box.x, y: box.y, button: 'left', clickCount: 1 });
+    await delay(1500);
+  }
+  // --type=text types into whatever has focus, then presses Enter.
+  if (option('type')) { await send('Input.insertText', { text: option('type') }); for (const type of ['rawKeyDown', 'keyUp']) await send('Input.dispatchKeyEvent', { type, key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, nativeVirtualKeyCode: 13 }); }
+  if (option('keys') || option('click') || option('type')) await delay(Number(option('after') ?? 3000));
   if (caught.length) { await send('Debugger.setPauseOnExceptions', { state: 'none' }); console.log(`Exceptions during keys:\n${caught.slice(0, 20).join('\n')}`); }
   if (option('eval')) console.log('eval:', JSON.stringify(await evaluate(option('eval'))));
   if (problems.length) console.log(`Renderer problems:\n${[...new Set(problems)].filter(p => !/depends on UNKNOWN service|NOT registered|Cannot instantiate named customer/.test(p)).slice(0, 15).map(p => String(p).slice(0, 900)).join('\n---\n')}`);

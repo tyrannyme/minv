@@ -1,0 +1,13 @@
+{
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "minv-site",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "public",
+    "not_found_handling": "404-page"
+  },
+  "routes": [
+    { "pattern": "minv.tyranny.me", "custom_domain": true }
+  ],
+  "workers_dev": false
+}
