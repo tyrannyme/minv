@@ -224,7 +224,8 @@ textarea.field { height: auto; padding: 10px 12px; resize: none; line-height: 1.
 .file .dir bdi { direction: ltr; unicode-bidi: isolate; }
 .file .acts { display: flex; opacity: 0; }
 .file:hover .acts, .file:focus-within .acts, .file.current .acts { opacity: 1; }
-.file .sub { grid-column: 3 / 5; font-size: 11.5px; color: var(--fg3); }
+.file .sub { grid-column: 2 / 5; grid-row: 2; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11.5px; line-height: 1.3; color: var(--fg3); }
+.file.tall .base, .file.tall .dir, .file.tall .acts { grid-row: 1; }
 .file.tall { height: 44px; grid-template-rows: 1fr 1fr; padding-top: 3px; padding-bottom: 3px; }
 .file.tall .letter { grid-row: 1 / 3; }
 
