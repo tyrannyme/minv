@@ -7,3 +7,5 @@ build/
 desktop/editor/generated/
 desktop/renderer/dist/
 desktop/renderer/src/mock/manifest.generated.ts
+HANDOFF.md
+docs/NAME_REVIEW.md
