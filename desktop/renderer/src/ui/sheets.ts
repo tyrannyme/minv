@@ -3,17 +3,15 @@ import { normalizeAppearance, type Appearance, type EditorHandle } from '../cont
 import { changedRange, inlinePairs, splitRows, stats, type DiffLine, type FileDiff, type Hunk } from '../diff.js';
 import { attr, h, kbd, mod, text } from '../dom.js';
 import { branchText, changeCount, groupChanges, languageName, languageOf, plural, relativeTime, shortOid, splitPath } from '../format.js';
-import { selectedRow, type Sheet, type State } from '../state.js';
+import { type Sheet, type State } from '../state.js';
 import { close as closeIcon, mark } from './icons.js';
-import { ledger } from './index.js';
 
 interface SheetView { element: HTMLElement; render(state: State): void; layout?(): void; focus(): void; dispose?(): void }
 
 export function createDesk(app: App): { element: HTMLElement; render(state: State): void; focus(): void; layout(): void } {
   const tabs = h('div', { class: 'sheet-tabs', role: 'tablist', 'aria-label': 'Open sheets' });
-  const split = h('button', { class: 'button quiet', title: `Split desk (${mod} \\)`, onclick: () => app.toggleSplit() }, 'Split');
-  const focusBtn = h('button', { class: 'button quiet', title: `Focus mode (${mod} B)`, onclick: () => app.store.update(s => { s.focus = !s.focus; }) }, 'Focus');
-  const strip = h('div', { class: 'strip' }, tabs, h('div', { class: 'strip-tools' }, split, focusBtn));
+  const focusBtn = h('button', { class: 'button quiet', hidden: true, title: `Leave focus mode (${mod} B)`, onclick: () => app.store.update(s => { s.focus = false; }) }, 'Leave focus');
+  const strip = h('div', { class: 'strip' }, tabs, h('div', { class: 'strip-tools' }, focusBtn));
   const panes = h('div', { class: 'panes' });
   const element = h('main', { class: 'desk', 'aria-label': 'Sheets' }, strip, panes);
   const views = new Map<string, SheetView>();
@@ -48,12 +46,11 @@ export function createDesk(app: App): { element: HTMLElement; render(state: Stat
           onkeydown: (e: KeyboardEvent) => { if (e.key === 'Enter') { app.activate(sheet.id); app.focusPlane('sheet'); } } },
           sheet.dirty ? h('span', { class: 'dirty', 'aria-label': 'unsaved' }) : null,
           kind ? h('span', { class: 'kind' }, kind === 'review' ? 'Diff' : kind) : null,
-          h('span', { class: 'tt' }, sheet.title), owner && sheet.kind !== 'settings' ? h('span', { class: 'owner' }, owner) : null,
+          h('span', { class: 'tt' }, sheet.title), owner && sheet.kind !== 'settings' && (counts.get(sheet.title) ?? 0) > 1 ? h('span', { class: 'owner' }, owner) : null,
           h('button', { class: 'x', 'aria-label': `Close ${sheet.title}`, onclick: () => void app.closeSheet(sheet.id) }, closeIcon()));
-        void counts;
         return tab;
       }));
-      attr(split, 'aria-pressed', String(!!state.splitSheet));
+      attr(focusBtn, 'hidden', !state.focus);
       // Panes
       const active = state.sheets.find(s => s.id === state.activeSheet);
       const splitSheet = state.sheets.find(s => s.id === state.splitSheet);
@@ -89,7 +86,7 @@ function sheetFrame(label: string) {
 function heading(app: App, sheet: Sheet, title: string, aside?: string) {
   const owner = app.state.rows.get(sheet.repositoryId);
   const { dir } = splitPath(sheet.path ?? '');
-  return [h('div', { class: 'path' }, owner ? h('b', null, owner.name) : '', owner ? ' / ' : '', dir), h('div', { class: 'file-title' }, title, aside ? h('span', { class: 'aside' }, aside) : null)];
+  return [h('div', { class: 'path' }, owner ? h('b', null, owner.name) : '', owner ? ' / ' : '', dir, h('span', { class: 'leaf' }, title), aside ? h('span', { class: 'aside' }, aside) : null)];
 }
 
 const eolName = { lf: 'LF', crlf: 'CRLF', cr: 'CR', mixed: 'Mixed line endings', none: 'No line endings' } as const;
@@ -117,9 +114,10 @@ function fileView(app: App, sheet: Sheet): SheetView {
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'g') { e.preventDefault(); e.stopPropagation(); void gotoLine(); }
   }, true);
   f.tools.append(
-    h('button', { class: 'button quiet', title: `Find (${mod} F)`, onclick: () => handle?.run('find') }, 'Find'),
-    h('button', { class: 'button quiet', title: `Go to line (${mod} G)`, onclick: () => void gotoLine() }, 'Line'),
-    h('button', { class: 'button quiet', onclick: (e: Event) => app.menu(e.currentTarget as HTMLElement, [
+    h('button', { class: 'button quiet', 'aria-label': 'File actions', onclick: (e: Event) => app.menu(e.currentTarget as HTMLElement, [
+      { label: 'Find', hint: `${mod} F`, run: () => handle?.run('find') },
+      { label: 'Go to line…', hint: `${mod} G`, run: () => void gotoLine() },
+      'sep',
       { label: 'Save', hint: `${mod} S`, run: () => void app.save(sheet) },
       { label: 'Review changes', run: () => void app.openReview(sheet.repositoryId, sheet.path!, 'unstaged') },
       { label: 'Reveal in file manager', run: () => void app.reveal(sheet.path) },
@@ -169,8 +167,12 @@ function fileView(app: App, sheet: Sheet): SheetView {
         requestAnimationFrame(() => { handle?.layout(); if (sheet.view) { handle?.setView(sheet.view); sheet.view = undefined; } else if (sheet.line) handle?.revealLine(sheet.line, sheet.column); handle?.focus(); });
       }
       handle = rt.handle;
-      if (c) { text(enc, `${encName[c.encoding]}${c.bom ? ' with BOM' : ''}`); text(eol, eolName[c.eol]); text(lang, languageName[languageOf(sheet.path!)] ?? 'Plain text'); }
-      text(state, rt.saving ? 'Saving…' : rt.dirty ? 'Unsaved' : 'Saved');
+      if (c) {
+        text(enc, c.encoding === 'utf8' && !c.bom ? '' : `${encName[c.encoding]}${c.bom ? ' with BOM' : ''}`);
+        text(eol, c.eol === 'lf' || c.eol === 'none' ? '' : eolName[c.eol]);
+        text(lang, languageName[languageOf(sheet.path!)] ?? 'Plain text');
+      }
+      text(state, rt.saving ? 'Saving…' : rt.dirty ? 'Unsaved' : '');
       state.className = rt.dirty ? 'state-dirty' : '';
       void st;
     },
@@ -449,30 +451,18 @@ function createFront(app: App) {
     render(state: State) {
       const w = state.workspace;
       if (!w) return;
-      const l = ledger(state);
-      const sel = selectedRow(state);
-      const withChanges = state.order.map(id => state.rows.get(id)!).filter(r => r.status.state === 'observed' && changeCount(r.status.value) > 0).slice(0, 7);
-      const key = JSON.stringify([w.name, l, sel?.id, withChanges.map(r => [r.id, changeCount(r.status.value)]), state.recoveries.length, w.trusted]);
+      const working = state.order.map(id => state.rows.get(id)!).filter(r => r.status.state === 'observed' && changeCount(r.status.value) > 0).slice(0, 7);
+      const key = JSON.stringify([w.name, working.map(r => [r.id, branchText(r.branch), changeCount(r.status.value)]), state.recoveries.map(d => d.documentId)]);
       if (element.dataset.key === key) return;
       element.dataset.key = key;
-      const known = l.total - l.offline;
-      const readout = (num: string | HTMLElement, what: string, signal = false) => h('div', null, h('div', { class: `num${signal ? ' signal' : ''}` }, num), h('div', { class: 'what' }, what));
-      const primer: [string[], string][] = [[[mod, 'K'], 'Go to a repository, file or command'], [['/'], 'Find a repository'], [[mod, '1 2 3'], 'Repositories, inspector, editor'], [['Space'], 'Stage or unstage the focused file'], [['S'], 'Stage the current hunk in a review'], [[mod, '⏎'], 'Commit']];
+      const pick = (label: string, aside: string, run: () => void) => h('button', { class: 'pick', onclick: run }, h('span', null, label), h('span', { class: 'b' }, aside));
+      const primer: [string[], string][] = [[[mod, 'K'], 'Go to anything'], [['/'], 'Find a repository'], [[mod, '⏎'], 'Commit']];
       element.replaceChildren(
-        h('div', { class: 'kicker' }, w.fixture ? 'Preview fixture · ' : '', w.roots[0]?.replace(/^\/home\/[^/]+/, '~') ?? ''),
-        h('h1', null, w.name),
-        h('div', { class: 'readouts', role: 'status' },
-          readout(h('span', null, String(l.verified), h('small', null, `/${known}`)), l.checking ? `branches verified · ${l.checking} checking` : l.unverified ? `branches verified · ${l.unverified} from last session` : 'branches verified', l.verified === known && known > 0),
-          readout(l.statusKnown ? String(l.withChanges) : '—', l.statusKnown < known ? `with changes · ${known - l.statusKnown} not scanned yet` : 'with changes'),
-          readout(String(l.offline + l.failed), l.offline + l.failed === 1 ? 'checkout unavailable' : 'checkouts unavailable'),
-          readout(w.discovery === 'complete' ? 'Done' : w.discovery === 'error' ? 'Error' : '…', w.discovery === 'complete' ? 'discovery complete' : w.discovery === 'cached' ? 'saved catalog, discovering' : 'discovering checkouts')),
-        h('div', { class: 'front-grid' },
-          h('div', null, h('h2', { class: 'label' }, withChanges.length ? 'Work in progress' : 'Repositories'),
-            ...(withChanges.length ? withChanges : state.order.slice(0, 6).map(id => state.rows.get(id)!)).map(r => h('button', { class: 'pick', onclick: () => { app.select(r.id); app.focusPlane('folio'); } },
-              h('span', null, r.name), h('span', { class: 'b' }, `${branchText(r.branch) ?? '—'}${r.status.value && changeCount(r.status.value) ? ` · ${changeCount(r.status.value)}` : ''}`)))),
-          h('div', null, h('h2', { class: 'label' }, 'Keys'), h('div', { class: 'primer' }, ...primer.flatMap(([keys, label]) => [kbd(...keys), h('span', null, label)]))),
-          state.recoveries.length ? h('div', null, h('h2', { class: 'label' }, 'Unsaved drafts'), ...state.recoveries.map(d => h('button', { class: 'pick', onclick: () => void openDraft(app, d.documentId, d.repositoryId, d.path) }, h('span', null, splitPath(d.path).base), h('span', { class: 'b' }, `${state.rows.get(d.repositoryId)?.name ?? ''}${d.updatedAt ? ` · ${relativeTime(d.updatedAt)}` : ''}`)))) : null),
-        h('p', { class: 'colophon' }, h('b', null, 'minv'), ' — an editor and a repository map. Nothing else competes for your attention.'));
+        working.length ? h('div', null, h('h2', { class: 'label' }, 'Work in progress'),
+          ...working.map(r => pick(r.name, `${branchText(r.branch) ?? '—'} · ${changeCount(r.status.value)}`, () => { app.select(r.id); app.focusPlane('folio'); }))) : '',
+        state.recoveries.length ? h('div', null, h('h2', { class: 'label' }, 'Unsaved drafts'),
+          ...state.recoveries.map(d => pick(splitPath(d.path).base, `${state.rows.get(d.repositoryId)?.name ?? ''}${d.updatedAt ? ` · ${relativeTime(d.updatedAt)}` : ''}`, () => void openDraft(app, d.documentId, d.repositoryId, d.path)))) : '',
+        h('div', { class: 'primer' }, ...primer.flatMap(([keys, label]) => [kbd(...keys), h('span', null, label)])));
     },
   };
 }

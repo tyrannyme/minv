@@ -520,3 +520,13 @@ textarea.field { height: auto; padding: 10px 12px; resize: none; line-height: 1.
 .editor-host .monaco-menu .monaco-action-bar.vertical .action-label { padding: 0 10px; font-size: var(--text-small); }
 .editor-host .monaco-menu .monaco-action-bar.vertical .keybinding { font-family: var(--font-readout); font-stretch: 87.5%; font-size: 10.5px; color: var(--fg3); padding: 0 10px; }
 .editor-host .monaco-menu .monaco-action-bar.vertical .action-label.separator { border-bottom-color: var(--line) !important; margin: 4px 6px; }
+
+/* Quiet by default: verified rows carry no dot; the home page is a short list, not a dashboard. */
+.row .glyph[data-f="observed"]::before { background: transparent; }
+.sheet-head { min-height: 44px; }
+.sheet-head .path .leaf { color: var(--fg); font-weight: 600; }
+.sheet-head .path .aside { margin-left: 10px; color: var(--fg3); }
+.front { align-content: center; justify-items: start; gap: 36px; padding: 40px max(32px, 12%); }
+.front > div { width: 100%; max-width: 420px; }
+.front .primer { color: var(--fg3); }
+.row .branch.default { color: var(--fg3); }

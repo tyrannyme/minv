@@ -23,6 +23,16 @@ The previous Ink/Paper direction (serif, paper, desk metaphor, beige and copper)
 | Shape before colour | Freshness glyphs differ by shape; unverified values are italic; high contrast adds outlines and diff edge bars. |
 | Calm | No spinner walls, no shifting rows, no toasts for routine success except a brief dark pill. |
 
+## Exceptions, not confirmations
+
+Kaf's review (2026-10-05): the first Signal build showed too much. The rule since then is that **a healthy workspace is quiet**. Minv shows a fact when it needs attention and stays silent when it only confirms that things are fine.
+
+- No "verified", "clean", "in sync", "checked just now" or "discovery complete" text. Fresh and clean are the default and need no label.
+- Stale, checking, offline, unreadable, ahead/behind, changes, conflicts, restricted mode and degraded watching always show, as before. Hiding a confirmation never hides an unverified state (PRD §9 still holds).
+- One adaptive sync button (Fetch, or Pull ↓n / Push ↑n when that's the useful action). Everything else is in ⋯ or the palette.
+- The commit form appears once something is staged or a message is drafted. The editor footer names encoding and line endings only when they aren't UTF-8 and LF. Tabs name their repository only when two tabs share a file name. Default branches (`main`, `master`) are dimmed so feature branches stand out.
+- The empty desk lists work in progress and unsaved drafts, plus three keys. It's not a dashboard.
+
 ## Composition
 
 ```

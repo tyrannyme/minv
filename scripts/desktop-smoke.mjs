@@ -272,7 +272,7 @@ function runElectronHarness() {
     await shot('find');
     await window.webContents.executeJavaScript(`(async()=>{const v=${view};v.trigger('gallery','closeFindWidget');await v.getAction('editor.action.startFindReplaceAction').run();})()`);
     await shot('replace');
-    await window.webContents.executeJavaScript(`(async()=>{const v=${view};v.trigger('gallery','closeFindWidget');[...document.querySelectorAll('button')].find(b=>b.textContent==='Line').click();})()`);
+    await window.webContents.executeJavaScript(`(async()=>{const v=${view};v.trigger('gallery','closeFindWidget');v.focus();document.activeElement.dispatchEvent(new KeyboardEvent('keydown',{key:'g',ctrlKey:true,bubbles:true}));})()`);
     await shot('goto-line');
     await window.webContents.executeJavaScript(`(async()=>{document.querySelector('.dialog')?.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));const v=${view};const t=v.getDomNode().querySelector('.view-lines');const r=t.getBoundingClientRect();t.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,clientX:r.left+120,clientY:r.top+30,button:2}));})()`);
     await shot('context-menu');

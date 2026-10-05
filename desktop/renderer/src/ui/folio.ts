@@ -47,7 +47,8 @@ export function createFolio(app: App): { element: HTMLElement; render(state: Sta
       const view = state.tab === 'changes' ? changes : state.tab === 'files' ? files : state.tab === 'history' ? history : search;
       if (shownTab !== state.tab || shownRepo !== row?.id) { body.replaceChildren(view.element); body.scrollTop = 0; shownTab = state.tab; shownRepo = row?.id; }
       view.render(state, row);
-      attr(slip, 'hidden', state.tab !== 'changes' || !row);
+      const staged = row?.status.value ? groupChanges(row.status.value).staged.length : 0;
+      attr(slip, 'hidden', state.tab !== 'changes' || !row || (!staged && !state.drafts.get(row.id)));
       if (row && state.tab === 'changes') commit.render(state, row);
     },
   };
@@ -63,7 +64,7 @@ function renderHead(app: App, head: HTMLElement, row: RepositoryRow | undefined,
   const chain: RepositoryRow[] = [];
   while (parent && chain.length < 8) { chain.unshift(parent); parent = parent.parentId ? state.rows.get(parent.parentId) : undefined; }
   for (const p of chain) crumbs.push(h('button', { onclick: () => app.select(p.id), title: `Select ${p.name}` }, p.name), '/');
-  crumbs.push(h('span', null, row.relativePath ? row.relativePath.slice(chain.at(-1)?.relativePath ? chain.at(-1)!.relativePath.length + 1 : 0) : row.root.replace(/^\/home\/[^/]+/, '~')));
+  if (chain.length) crumbs.push(h('span', null, row.relativePath.slice(chain.at(-1)?.relativePath ? chain.at(-1)!.relativePath.length + 1 : 0)));
 
   const b = row.branch;
   const name = branchText(b);
@@ -72,13 +73,13 @@ function renderHead(app: App, head: HTMLElement, row: RepositoryRow | undefined,
   const branchButton = h('button', { class: 'branch-name', disabled: !row.available, title: writable ? `Switch branch (${mod} ⇧ B)` : 'Branches', onclick: () => void app.branchPicker() },
     h('span', { class: unverified ? 'unverified' : '' }, name ?? (b.state === 'error' ? 'unreadable' : 'checking…')), h('span', { class: 'chev', 'aria-hidden': 'true' }, '⌄'));
   const up = row.upstream?.value;
-  const upstream = up ? h('span', { class: `upstream ${row.upstream!.state === 'observed' ? '' : 'unverified'}`, title: up.lastFetchAt ? `Last fetched ${relativeTime(up.lastFetchAt)}` : 'Not fetched in this session; counts use local refs only' },
-    up.ahead || up.behind ? [h('b', null, `↑${up.ahead}`), ' ', h('b', null, `↓${up.behind}`), ' '] : 'in sync with ', up.name) : null;
+  const upstream = up && (up.ahead || up.behind) ? h('span', { class: `upstream ${row.upstream!.state === 'observed' ? '' : 'unverified'}`, title: up.lastFetchAt ? `Last fetched ${relativeTime(up.lastFetchAt)}` : 'Not fetched in this session; counts use local refs only' },
+    up.ahead ? [h('b', null, `↑${up.ahead}`), ' '] : '', up.behind ? [h('b', null, `↓${up.behind}`), ' '] : '', up.name) : null;
 
   const glyph = (f: string) => h('span', { class: 'glyph', 'data-f': f, 'aria-hidden': 'true' });
   const facts = h('div', { class: 'facts' },
-    h('div', { class: 'fact' }, glyph(!row.available ? 'offline' : b.state), branchSentence(row)),
-    row.available ? h('div', { class: 'fact' }, glyph(row.status.state), statusSentence(row)) : null);
+    row.available && b.state !== 'observed' ? h('div', { class: 'fact' }, glyph(b.state), branchSentence(row)) : null,
+    row.available && row.status.state !== 'observed' ? h('div', { class: 'fact' }, glyph(row.status.state), statusSentence(row)) : null);
 
   const notes: HTMLElement[] = [];
   const op = b.value?.operation;
@@ -89,12 +90,18 @@ function renderHead(app: App, head: HTMLElement, row: RepositoryRow | undefined,
   const net = app.network.get(row.id);
   if (net) notes.push(h('div', { class: 'note', role: 'status' }, h('b', null, `${net.kind === 'fetch' ? 'Fetching' : net.kind === 'pull' ? 'Pulling' : 'Pushing'} ${net.remote}.`), `Started ${relativeTime(net.since)}.`, h('br'), h('button', { class: 'button', onclick: () => void app.cancelNetwork(row.id) }, 'Stop')));
 
+  // One sync button that says what it will do: pull when behind, push when ahead, otherwise fetch.
+  const sync: 'pull' | 'push' | 'fetch' = up?.behind ? 'pull' : up?.ahead ? 'push' : 'fetch';
+  const syncLabel = sync === 'pull' ? `Pull ↓${up!.behind}` : sync === 'push' ? `Push ↑${up!.ahead}` : 'Fetch';
   const actions = h('div', { class: 'repo-actions' },
-    h('button', { class: 'button', disabled: !writable || !!net, onclick: () => void app.remote('fetch') }, 'Fetch'),
-    h('button', { class: 'button', disabled: !writable || !!net, onclick: () => void app.remote('pull') }, 'Pull'),
-    h('button', { class: 'button', disabled: !writable || !!net, onclick: () => void app.remote('push') }, 'Push'),
-    h('button', { class: 'button', disabled: !row.available, onclick: () => void app.terminal() }, 'Terminal'),
+    h('button', { class: 'button', disabled: !writable || !!net, onclick: () => void app.remote(sync) }, syncLabel),
     h('button', { class: 'button', 'aria-label': 'More repository actions', onclick: (e: Event) => app.menu(e.currentTarget as HTMLElement, [
+      ...(writable && !net ? [
+        ...(sync !== 'fetch' ? [{ label: 'Fetch', run: () => void app.remote('fetch') }] : []),
+        ...(sync !== 'pull' ? [{ label: 'Pull', run: () => void app.remote('pull') }] : []),
+        ...(sync !== 'push' ? [{ label: 'Push', run: () => void app.remote('push') }] : []),
+        'sep' as const] : []),
+      { label: 'Open terminal here', run: () => void app.terminal() },
       { label: state.pins.includes(row.id) ? 'Unpin from top' : 'Pin to top', run: () => app.togglePin(row.id) },
       { label: 'Refresh', hint: `${mod} R`, run: () => void app.refreshSelected() },
       { label: 'Stash changes…', run: () => void app.stash(row.id) },
@@ -104,7 +111,7 @@ function renderHead(app: App, head: HTMLElement, row: RepositoryRow | undefined,
       { label: 'Show diagnostics', run: () => void app.call('diagnostics.open', undefined) },
     ]) }, '⋯'));
 
-  head.replaceChildren(h('div', { class: 'crumbs' }, ...crumbs), h('h1', { class: 'title' }, row.name),
+  head.replaceChildren(crumbs.length ? h('div', { class: 'crumbs' }, ...crumbs) : '', h('h1', { class: 'title' }, row.name),
     h('div', { class: 'branch-line' }, h('span', { class: 'on' }, b.value?.kind === 'detached' ? 'at' : 'on'), branchButton, upstream),
     facts, ...notes, actions);
 }
@@ -125,10 +132,13 @@ function createChanges(app: App) {
       { label: 'Open file', hint: 'E', run: () => void app.openFile(row.id, e.change.path) },
       ...(!staged && e.kind !== 'submodule' ? ['sep' as const, { label: 'Discard changes…', hint: 'Del', danger: true, run: () => void app.discard(row.id, [e.change.path]) }] : []),
     ]); } }, '⋯');
-    const sub = e.kind === 'submodule' ? h('span', { class: 'sub' }, pointerSentence(e)) : e.change.originalPath ? h('span', { class: 'sub' }, `from ${e.change.originalPath}`) : null;
+    // A moved pointer is what the section already says; only unusual pointer states get a second line.
+    const pointer = e.kind === 'submodule' ? pointerSentence(e) : '';
+    const plainPointer = pointer === 'checked-out commit differs from recorded' || pointer === 'new commit recorded';
+    const sub = pointer && !plainPointer ? h('span', { class: 'sub' }, pointer) : e.change.originalPath ? h('span', { class: 'sub' }, `from ${e.change.originalPath}`) : null;
     const el = h('div', { class: `file${sub ? ' tall' : ''}`, tabindex: '0', role: 'listitem', 'data-kind': e.kind,
       'aria-label': `${base}, ${dir || 'repository root'}, ${e.kind}${staged ? ', staged' : ''}`,
-      onclick: open,
+      title: pointer || null, onclick: open,
       onkeydown: (ev: KeyboardEvent) => {
         if (ev.key === 'Enter') open();
         else if (ev.key === ' ') { if (writable) void app.stage(row.id, [e.change.path], staged); }
@@ -192,12 +202,11 @@ function nextFocusable(from: HTMLElement, dir: 1 | -1): HTMLElement | undefined 
 // ── Commit slip ──────────────────────────────────────────────────────────────
 
 function createSlip(app: App, slip: HTMLElement) {
-  const target = h('div', { class: 'slip-target' });
   const message = h('textarea', { class: 'field', rows: '3', placeholder: 'Message: what changed and why', 'aria-label': 'Commit message', spellcheck: 'true' });
   const meter = h('span', { class: 'meter', 'aria-hidden': 'true' });
   const why = h('span', { class: 'slip-why grow' });
   const commit = h('button', { class: 'button primary', onclick: () => void submit() }, 'Commit', h('span', { class: 'keys' }, h('kbd', null, mod), h('kbd', null, '⏎')));
-  slip.append(target, message, h('div', { class: 'slip-foot' }, why, meter, commit));
+  slip.append(message, h('div', { class: 'slip-foot' }, why, meter, commit));
   let repo: string | undefined;
   const submit = async () => { if (!repo || commit.disabled) return; commit.disabled = true; await app.commit(repo); };
   message.addEventListener('input', () => {
@@ -217,7 +226,7 @@ function createSlip(app: App, slip: HTMLElement) {
       else if (!state.drafts.has(row.id) && message.value && document.activeElement !== message) { message.value = ''; grow(); meterText(); }
       const g = groupChanges(row.status.value);
       const branch = branchText(row.branch);
-      target.replaceChildren('Commit to ', h('b', null, row.name), ' on ', h('code', { class: row.branch.state === 'observed' ? '' : 'unverified' }, branch ?? '—'));
+      commit.firstChild!.textContent = branch ? `Commit to ${branch}` : 'Commit';
       const staged = `${plural(g.staged.length, 'file')} staged${row.branch.value?.kind === 'detached' ? ' · detached HEAD' : ''}`;
       const blocked = app.writable(row)
         ?? (row.status.state !== 'observed' ? 'Waiting for changes to be verified' : undefined)

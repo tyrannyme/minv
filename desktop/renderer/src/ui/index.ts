@@ -26,7 +26,6 @@ export function ledger(state: State) {
 
 export function createMasthead(app: App): { element: HTMLElement; render(state: State): void } {
   const name = h('span', { class: 'workspace-name' });
-  const root = h('span', { class: 'workspace-root' });
   const fixture = h('span', { class: 'fixture-label', hidden: true, title: 'No desktop host is attached. Data comes from the bundled preview fixture.' });
   const ledgerEl = h('div', { class: 'ledger', role: 'status', 'aria-live': 'off' });
   const goto = h('button', { class: 'goto', onclick: () => openPalette(app), 'aria-label': 'Go to a repository, file or command' }, search(), h('span', { class: 'q' }, 'Go to anything'), kbd(mod, 'K'));
@@ -36,22 +35,22 @@ export function createMasthead(app: App): { element: HTMLElement; render(state: 
     h('button', { class: 'close', 'aria-label': 'Close window', onclick: () => void app.call('window.close', undefined, true) }, close()));
   const brandMark = mark(); brandMark.classList.add('mark');
   const element = h('header', { class: 'masthead', ondblclick: (e: MouseEvent) => { if (e.target === element) void app.call('window.toggleMaximize', undefined, true); } },
-    h('div', { class: 'brand', title: 'Minv · Browse. Review. Commit.' }, brandMark, h('span', { class: 'wordmark' }, 'minv'), h('span', { class: 'sep' }), name, root, fixture),
+    h('div', { class: 'brand', title: 'Minv · Browse. Review. Commit.' }, brandMark, h('span', { class: 'wordmark' }, 'minv'), h('span', { class: 'sep' }), name, fixture),
     goto, h('div', { class: 'bar-right' }, ledgerEl, controls));
   return {
     element,
     render(state) {
       const w = state.workspace;
       text(name, w?.name ?? 'Browse. Review. Commit.');
-      text(root, w ? w.roots.join(' · ').replace(/^\/home\/[^/]+/, '~') : '');
+      name.title = w ? w.roots.join('\n') : '';
       attr(fixture, 'hidden', !w?.fixture); text(fixture, w?.fixture ?? '');
       if (!w) { ledgerEl.replaceChildren(); return; }
+      // Only what needs attention. A healthy workspace shows nothing here.
       const l = ledger(state);
-      const parts: [string, string | number, string, Freshness | 'offline' | ''][] = [];
-      parts.push(['', `${l.verified}/${l.total - l.offline}`, 'verified', l.checking ? 'refreshing' : l.unverified ? 'cached' : 'observed']);
-      if (l.failed + l.offline) parts.push(['opt', l.failed + l.offline, 'offline', 'error']);
-      parts.push(['opt', l.statusKnown ? l.withChanges : '—', 'changed', '']);
-      ledgerEl.replaceChildren(...parts.map(([cls, n, label, f]) => h('span', { class: `item ${cls}` }, f ? h('span', { class: 'glyph', 'data-f': f, 'aria-hidden': 'true' }) : null, h('b', null, String(n)), label)));
+      const parts: [string | number, string, Freshness | 'offline'][] = [];
+      if (l.checking) parts.push([l.checking, 'checking', 'refreshing']);
+      if (l.failed + l.offline) parts.push([l.failed + l.offline, 'offline', 'error']);
+      ledgerEl.replaceChildren(...parts.map(([n, label, f]) => h('span', { class: 'item' }, h('span', { class: 'glyph', 'data-f': f, 'aria-hidden': 'true' }), h('b', null, String(n)), label)));
       if (!w.trusted) ledgerEl.append(h('span', { class: 'item' }, h('b', null, 'Restricted')));
     },
   };
@@ -100,6 +99,7 @@ function paletteCommands(app: App) {
       c('backups', 'Restore a backup…', () => void app.restoreBackups()),
       c('focus', 'Toggle focus mode', () => app.store.update(s => { s.focus = !s.focus; }), `${mod} B`),
       c('split', 'Toggle split desk', () => app.toggleSplit(), `${mod} \\`),
+      c('layout', app.state.layout === 'tree' ? 'Show repositories as a flat list' : 'Show repositories as a tree', () => app.store.update(s => { s.layout = s.layout === 'tree' ? 'flat' : 'tree'; })),
       c('trust', app.state.workspace?.trusted ? 'Return to restricted mode' : 'Trust this workspace…', () => void app.setTrust(!app.state.workspace?.trusted)),
       c('close', 'Close workspace', () => void app.closeWorkspace()),
     ] : []),
@@ -117,15 +117,12 @@ function paletteCommands(app: App) {
 
 export function createIndex(app: App): { element: HTMLElement; render(state: State): void; focus(): void; focusFind(): void } {
   const find = h('input', { class: 'field', type: 'search', placeholder: 'Find repository', 'aria-label': 'Find repository by name, path or branch', spellcheck: 'false' });
-  const tree = h('button', { class: 'button quiet toggle', 'aria-pressed': 'true', onclick: () => app.store.update(s => { s.layout = 'tree'; }) }, 'Tree');
-  const flat = h('button', { class: 'button quiet toggle', 'aria-pressed': 'false', onclick: () => app.store.update(s => { s.layout = 'flat'; }) }, 'Flat');
-  const count = h('span');
   const spacer = h('div', { class: 'spacer' });
   const list = h('div', { class: 'list', role: 'tree', tabindex: '0', 'aria-label': 'Repositories', 'aria-multiselectable': 'false' }, spacer);
   const foot = h('div', { class: 'index-foot', role: 'status' });
   const note = h('div', { class: 'empty-note', hidden: true });
   const element = h('nav', { class: 'index', 'aria-label': 'Repository index' },
-    h('div', { class: 'index-head' }, h('div', { class: 'find' }, find, kbd('/')), h('div', { class: 'index-meta' }, count, h('div', { class: 'seg', role: 'group', 'aria-label': 'Layout' }, tree, flat))),
+    h('div', { class: 'index-head' }, h('div', { class: 'find' }, find, kbd('/'))),
     list, note, foot);
 
   let rows: string[] = [];
@@ -219,7 +216,7 @@ export function createIndex(app: App): { element: HTMLElement; render(state: Sta
     if (branch!.dataset.v !== `${branchLabel}|${op}|${row.branch.state}`) {
       branch!.dataset.v = `${branchLabel}|${op}|${row.branch.state}`;
       branch!.replaceChildren(branchLabel, op ? h('span', { class: 'op' }, op) : '');
-      branch!.className = `branch${row.branch.state === 'cached' || row.branch.state === 'stale' || !row.available || !b ? ' unverified' : ''}`;
+      branch!.className = `branch${row.branch.state === 'cached' || row.branch.state === 'stale' || !row.available || !b ? ' unverified' : ''}${b === 'main' || b === 'master' ? ' default' : ''}`;
     }
     branch!.title = row.branch.value?.kind === 'detached' ? `Detached at ${row.branch.value.oid}` : b ?? '';
     // Change cell: zero only once zero is established.
@@ -229,7 +226,7 @@ export function createIndex(app: App): { element: HTMLElement; render(state: Sta
     if (!row.available) { label = ''; }
     else if (s.state === 'error') { label = '!'; cls = 'count error'; }
     else if (s.value && (s.state === 'observed' || s.state === 'refreshing' || s.state === 'stale' || s.state === 'cached')) {
-      label = n ? `${n}${s.value.complete ? '' : '+'}` : 'clean';
+      label = n ? `${n}${s.value.complete ? '' : '+'}` : '';
       cls = `count${n ? '' : ' clean'}${s.state === 'observed' ? '' : ' unverified'}`;
     } else if (s.state === 'refreshing') label = '…';
     text(count!, label); count!.className = cls;
@@ -268,16 +265,16 @@ export function createIndex(app: App): { element: HTMLElement; render(state: Sta
       if (changed) spacer.style.height = `${rows.length * rowHeight() + 8}px`;
       if (!restoredScroll && app.indexScrollTop && rows.length) { restoredScroll = true; list.scrollTop = app.indexScrollTop; }
       if (find.value !== state.filter && document.activeElement !== find) find.value = state.filter;
-      attr(tree, 'aria-pressed', String(state.layout === 'tree')); attr(flat, 'aria-pressed', String(state.layout === 'flat'));
       const w = state.workspace;
-      text(count, state.filter ? `${rows.length} of ${plural(state.rows.size, 'repository', 'repositories')}` : plural(state.rows.size, 'repository', 'repositories'));
       const discovering = w && w.discovery !== 'complete';
       attr(note, 'hidden', rows.length > 0 || !w);
       text(note, state.filter ? `No repository matches “${state.filter}”.${discovering ? ' Discovery is still running; more repositories may appear.' : ''}` : 'No repositories found in this workspace yet.');
-      foot.replaceChildren(
-        h('span', { class: 'glyph', 'data-f': !w ? 'unknown' : w.discovery === 'complete' ? 'observed' : w.discovery === 'error' ? 'error' : w.discovery === 'cached' ? 'cached' : 'refreshing', 'aria-hidden': 'true' }),
-        h('span', { class: 'grow' }, !w ? '' : w.discovery === 'complete' ? 'Discovery complete' : w.discovery === 'cached' ? 'Showing the saved catalog' : w.discovery === 'error' ? (w.discoveryError ?? 'Discovery failed') : `Discovering · ${plural(state.rows.size, 'checkout')} so far`),
-        h('button', { class: 'button quiet', title: `Refresh all (${mod} ⇧ R)`, onclick: () => void app.refreshAll() }, 'Refresh all'));
+      // The footer exists only while discovery is unfinished or failed.
+      attr(foot, 'hidden', !w || w.discovery === 'complete');
+      if (w && w.discovery !== 'complete') foot.replaceChildren(
+        h('span', { class: 'glyph', 'data-f': w.discovery === 'error' ? 'error' : w.discovery === 'cached' ? 'cached' : 'refreshing', 'aria-hidden': 'true' }),
+        h('span', { class: 'grow' }, w.discovery === 'cached' ? 'Showing the saved catalog' : w.discovery === 'error' ? (w.discoveryError ?? 'Discovery failed') : `Discovering · ${plural(state.rows.size, 'checkout')} so far`),
+        w.discovery === 'error' ? h('button', { class: 'button quiet', onclick: () => void app.refreshAll() }, 'Retry') : '');
       paint(state);
       if (state.selectedId && changed && state.selectedId !== active) { /* keep the anchor where it is: never scroll on background updates */ }
     },
