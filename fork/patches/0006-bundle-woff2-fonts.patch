@@ -1,0 +1,24 @@
+diff --git a/build/lib/optimize.ts b/build/lib/optimize.ts
+index 21a17ee1..5f7b9412 100644
+--- a/build/lib/optimize.ts
++++ b/build/lib/optimize.ts
+@@ -144,6 +144,7 @@ function bundleESMTask(opts: IBundleESMTaskOpts): NodeJS.ReadWriteStream {
+ 				target: [target],
+ 				loader: {
+ 					'.ttf': 'file',
++					'.woff2': 'file', // Minv: bundled fonts
+ 					'.svg': 'file',
+ 					'.png': 'file',
+ 					'.sh': 'file',
+diff --git a/build/next/index.ts b/build/next/index.ts
+index defbaa1b..42bc4daf 100644
+--- a/build/next/index.ts
++++ b/build/next/index.ts
+@@ -808,6 +808,7 @@ ${tslib}`,
+ 			banner,
+ 			loader: {
+ 				'.ttf': 'file',
++				'.woff2': 'file', // Minv: bundled fonts
+ 				'.svg': 'file',
+ 				'.png': 'file',
+ 				'.sh': 'file',

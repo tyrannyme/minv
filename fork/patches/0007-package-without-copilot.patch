@@ -1,0 +1,31 @@
+diff --git a/build/gulpfile.vscode.ts b/build/gulpfile.vscode.ts
+index ac122c37..b9c9efa7 100644
+--- a/build/gulpfile.vscode.ts
++++ b/build/gulpfile.vscode.ts
+@@ -184,7 +184,7 @@ task.task(bundleVSCodeTask);
+ const sourceMappingURLBase = `https://main.vscode-cdn.net/sourcemaps/${commit}`;
+ const isCI = !!process.env['CI'] || !!process.env['BUILD_ARTIFACTSTAGINGDIRECTORY'] || !!process.env['GITHUB_WORKSPACE'];
+ const useCdnSourceMapsForPackagingTasks = isCI;
+-const stripSourceMapsInPackagingTasks = isCI;
++const stripSourceMapsInPackagingTasks = true; // Minv: never ship source maps
+ const minifyVSCodeTask = task.define('minify-vscode', task.series(
+ 	bundleVSCodeTask,
+ 	util.rimraf('out-vscode-min'),
+@@ -394,6 +394,7 @@ function packageTask(platform: string, arch: string, sourceFolderName: string, d
+ 			.pipe(filter(getCopilotTgrepExcludeFilter(platform, arch)))
+ 			.pipe(filter(getRipgrepExcludeFilter(platform, arch)))
+ 			.pipe(filter(getMxcExcludeFilter(arch)))
++			.pipe(filter(['**', '!**/node_modules/@github/copilot*/**', '!**/node_modules/@microsoft/mxc-sdk/**'])) // Minv: no Copilot runtime
+ 			.pipe(filter(getFoundryLocalExcludeFilter()))
+ 			.pipe(filter(getOSProxyResolverExcludeFilter(platform, arch)))
+ 			.pipe(jsFilter)
+@@ -692,6 +693,9 @@ function prepareCopilotRipgrepShimTask(platform: string, arch: string, destinati
+ 		const appNodeModulesDir = path.join(appBase, 'node_modules.asar.unpacked');
+ 
+ 		const builtInCopilotExtensionDir = path.join(appBase, 'extensions', 'copilot');
++		if (!fs.existsSync(builtInCopilotExtensionDir)) {
++			return; // Minv: Copilot is not shipped.
++		}
+ 		prepareBuiltInCopilotRipgrepShim(platform, arch, builtInCopilotExtensionDir, appNodeModulesDir);
+ 	};
+ }

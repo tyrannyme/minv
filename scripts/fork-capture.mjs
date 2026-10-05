@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Launches the Code-OSS fork from .upstream/build in a private Xvfb display with a throwaway profile,
 // waits, and captures the window through the DevTools protocol. Nothing opens on the real desktop.
-// Usage: node scripts/fork-capture.mjs <workspace> [out.png] [--wait=ms] [--eval=js] [--settings=json]
+// Usage: node scripts/fork-capture.mjs <workspace> [out.png] [--app=packaged/minv] [--open=file] [--keys=ctrl+k,v] [--wait=ms] [--eval=js] [--debug]
 import { spawn, spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -27,7 +27,7 @@ const env = { ...process.env, VSCODE_SKIP_PRELAUNCH: '1' };
 for (const name of ['ELECTRON_RUN_AS_NODE', 'WAYLAND_DISPLAY']) delete env[name];
 const started = Date.now();
 const opened = option('open') ? [resolve(workspace, option('open'))] : [];
-const child = spawn(xvfb, ['-a', '--server-args=-screen 0 1600x1000x24', join(source, 'scripts/code.sh'), workspace, ...opened,
+const child = spawn(xvfb, ['-a', '--server-args=-screen 0 1600x1000x24', option('app') ? resolve(option('app')) : join(source, 'scripts/code.sh'), workspace, ...opened,
   '--user-data-dir', join(profile, 'data'), '--extensions-dir', join(profile, 'extensions'), `--remote-debugging-port=${port}`,
   ...(process.env.MINV_FORK_ARGS ? process.env.MINV_FORK_ARGS.split(' ') : []), '--disable-workspace-trust', '--skip-welcome', '--skip-release-notes', '--ozone-platform=x11', '--force-device-scale-factor=1'],
   { cwd: source, env, stdio: ['ignore', 'pipe', 'pipe'], detached: true });

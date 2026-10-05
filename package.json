@@ -1,39 +1,19 @@
 {
   "name": "minv",
-  "description": "A desktop code browser, text editor and Git client for workspaces with dozens of repositories.",
+  "description": "VS Code, cut down to reading, Markdown, changes, commits and branches.",
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
   "engines": {
-    "node": ">=22"
+    "node": "24.18.0"
   },
   "scripts": {
-    "postinstall": "node node_modules/electron/install.js",
-    "build": "node scripts/sandbox-build.mjs && tsc -p tsconfig.json",
-    "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.desktop.json && npm --prefix desktop/renderer run check",
-    "test": "npm run build && PATH=\"$PWD/node_modules/@vscode/ripgrep-universal/bin/linux-x64:$PATH\" node --test dist/test/*.test.js",
-    "start": "node scripts/minv.mjs",
-    "desktop:build": "npm run build && node scripts/desktop-build.mjs",
-    "build:desktop": "npm run desktop:build",
-    "desktop:check": "tsc -p tsconfig.desktop.json",
-    "desktop:package": "node scripts/package-desktop.mjs",
-    "editor:build": "node scripts/editor-build.mjs",
-    "editor:audit": "node scripts/editor-audit.mjs",
-    "editor:test": "node scripts/editor-smoke.mjs",
-    "upstream:fetch": "node scripts/upstream-fetch.mjs",
-    "upstream:prepare": "node scripts/prepare-upstream.mjs",
-    "upstream:audit": "node scripts/upstream-audit.mjs",
-    "fixture": "node scripts/fixture.mjs",
-    "bench": "npm run build && node scripts/bench.mjs"
-  },
-  "devDependencies": {
-    "@types/node": "^22.0.0",
-    "@vscode/codicons": "0.0.46-39",
-    "@vscode/ripgrep-universal": "1.18.0",
-    "electron": "44.5.1",
-    "esbuild": "0.28.2",
-    "typescript": "^5.7.0",
-    "vscode-oniguruma": "1.7.0",
-    "vscode-textmate": "9.3.2"
+    "fork": "node scripts/fork-prepare.mjs",
+    "setup": "node scripts/fork-prepare.mjs && cd .upstream/build && npm ci --no-audit --no-fund",
+    "compile": "node scripts/fork-prepare.mjs && cd .upstream/build && npm run compile-client && npm run electron",
+    "start": ".upstream/build/scripts/code.sh",
+    "build": "node scripts/fork-prepare.mjs && cd .upstream/build && npm run gulp vscode-linux-x64-min",
+    "package": "node scripts/fork-package.mjs",
+    "capture": "node scripts/fork-capture.mjs"
   }
 }

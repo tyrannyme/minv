@@ -1,23 +1,27 @@
 #!/usr/bin/env node
 // Turns the pinned Code-OSS checkout into Minv: a pristine worktree at .upstream/build, then Minv's changes
 // from fork/. Safe to rerun; every run starts again from the pinned upstream files (installed node_modules
-// and compiled output are kept).
+// and compiled output are kept). The first run fetches the pinned commit.
 import { execFileSync } from 'node:child_process';
-import { cpSync, existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const fork = join(root, 'fork');
-const pin = JSON.parse(readFileSync(join(root, 'product/upstream.json'), 'utf8'));
-const upstream = join(root, '.upstream/vscode');
+const pin = JSON.parse(readFileSync(join(fork, 'upstream.json'), 'utf8'));
 const build = join(root, '.upstream/build');
 const json = file => JSON.parse(readFileSync(file, 'utf8'));
 const git = (cwd, ...args) => execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] });
 
-if (!existsSync(upstream)) throw new Error('Fetch the pinned source first: npm run upstream:fetch');
-if (!existsSync(build)) git(upstream, 'worktree', 'add', '--detach', build, pin.commit);
-git(build, 'checkout', '--detach', '--force', pin.commit);
+// A shallow fetch of exactly the pinned commit. No tags, history or other branches.
+if (!existsSync(build)) {
+  mkdirSync(build, { recursive: true });
+  git(build, 'init', '--quiet');
+  git(build, 'remote', 'add', 'origin', pin.repository);
+  git(build, 'fetch', '--quiet', '--depth=1', 'origin', pin.commit);
+}
+git(build, 'checkout', '--quiet', '--detach', '--force', pin.commit);
 git(build, 'reset', '--hard', '--quiet', pin.commit);
 git(build, 'clean', '-fdq');
 
@@ -41,9 +45,9 @@ for (const name of json(join(fork, 'extensions-remove.json'))) {
 
 // Build lists name every extension to compile; drop the entries for removed ones.
 const removed = json(join(fork, 'extensions-remove.json'));
-for (const file of ['build/gulpfile.extensions.ts', 'build/lib/extensions.ts']) {
+for (const file of ['build/gulpfile.extensions.ts', 'build/lib/extensions.ts', 'build/npm/dirs.ts']) {
   const lines = readFileSync(join(build, file), 'utf8').split('\n');
-  const kept = lines.filter(line => !(/,\s*$/.test(line) && removed.some(name => new RegExp(`['"](?:extensions/)?${name.replace(/[-.]/g, '\\$&')}/`).test(line))));
+  const kept = lines.filter(line => !(/,\s*$/.test(line) && removed.some(name => new RegExp(`['"](?:extensions/)?${name.replace(/[-.]/g, '\\$&')}(?:/|['"])`).test(line))));
   writeFileSync(join(build, file), kept.join('\n'));
 }
 

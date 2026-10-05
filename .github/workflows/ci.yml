@@ -16,67 +16,64 @@ concurrency:
 
 jobs:
   build:
-    name: Build, test and package (Linux x64)
+    name: Build, smoke test and package (Linux x64)
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
 
       - uses: actions/setup-node@v5
         with:
           node-version: 24.18.0
-          cache: npm
-          cache-dependency-path: |
-            package-lock.json
-            desktop/renderer/package-lock.json
 
-      - name: Prepare runner
+      - name: Install build dependencies
         run: |
-          uname -r
-          git --version
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxkbfile-dev libsecret-1-dev libkrb5-dev xvfb
           # Electron's renderer sandbox needs unprivileged user namespaces.
           sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb
 
-      - name: Install
+      - name: Prepare the fork
+        run: node scripts/fork-prepare.mjs
+
+      - name: Cache upstream dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            .upstream/build/node_modules
+            .upstream/build/build/node_modules
+            .upstream/build/remote/node_modules
+            .upstream/build/extensions/*/node_modules
+            ~/.cache/node-gyp
+          key: upstream-deps-${{ hashFiles('fork/upstream.json', 'fork/extensions-remove.json') }}
+
+      - name: Install upstream dependencies
+        working-directory: .upstream/build
         run: |
-          npm ci --no-audit --no-fund
-          npm ci --prefix desktop/renderer --no-audit --no-fund
-
-      - name: Fetch pinned Code-OSS source
-        run: npm run upstream:fetch
+          if [ ! -d node_modules ]; then npm ci --no-audit --no-fund; fi
 
       - name: Build
-        run: npm run desktop:build
+        working-directory: .upstream/build
+        run: npm run gulp vscode-linux-x64-min
 
-      - name: Type-check
-        run: npm run check
-
-      - name: Audit editor closure
-        run: npm run editor:audit
-
-      - name: Core tests
-        run: npm test
-
-      - name: Renderer tests
-        run: npm --prefix desktop/renderer test
-
-      - name: Desktop smoke
-        run: node scripts/desktop-smoke.mjs
+      - name: Smoke test
+        run: |
+          mkdir -p build
+          git init -q -b main /tmp/smoke && git -C /tmp/smoke -c user.name=ci -c user.email=ci@minv.invalid commit -q --allow-empty -m init
+          node scripts/fork-capture.mjs /tmp/smoke build/smoke.png --app=.upstream/VSCode-linux-x64/minv --wait=8000 \
+            --eval="document.querySelector('.statusbar')?.innerText" | tee build/smoke.log
+          grep -q 'eval:.*main' build/smoke.log
 
       - name: Upload smoke evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: desktop-smoke
-          path: |
-            build/desktop/smoke.json
-            build/desktop/smoke.png
+          name: smoke
+          path: build/smoke.*
           if-no-files-found: ignore
 
       - name: Package
-        run: npm run desktop:package
+        run: node scripts/fork-package.mjs
 
       - name: Upload package
         uses: actions/upload-artifact@v4
