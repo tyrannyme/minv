@@ -8,6 +8,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "postinstall": "node node_modules/electron/install.js",
     "build": "node scripts/sandbox-build.mjs && tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.desktop.json && npm --prefix desktop/renderer run check",
     "test": "npm run build && node --test dist/test/*.test.js",
@@ -34,9 +35,5 @@
     "typescript": "^5.7.0",
     "vscode-oniguruma": "1.7.0",
     "vscode-textmate": "9.3.2"
-  },
-  "allowScripts": {
-    "electron@44.5.1": true,
-    "esbuild@0.28.2": true
   }
 }
