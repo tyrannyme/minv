@@ -1,0 +1,30 @@
+{
+	"name": "minv-theme",
+	"displayName": "Minv Themes",
+	"description": "Minv dark and light color themes.",
+	"version": "1.0.0",
+	"publisher": "minv",
+	"license": "MIT",
+	"engines": {
+		"vscode": "*"
+	},
+	"categories": [
+		"Themes"
+	],
+	"contributes": {
+		"themes": [
+			{
+				"id": "Minv Dark",
+				"label": "Minv Dark",
+				"uiTheme": "vs-dark",
+				"path": "./themes/minv-dark.json"
+			},
+			{
+				"id": "Minv Light",
+				"label": "Minv Light",
+				"uiTheme": "vs",
+				"path": "./themes/minv-light.json"
+			}
+		]
+	}
+}

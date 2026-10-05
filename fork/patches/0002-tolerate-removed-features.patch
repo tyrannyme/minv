@@ -1,0 +1,20 @@
+diff --git a/src/vs/workbench/services/extensions/common/extensionHostManager.ts b/src/vs/workbench/services/extensions/common/extensionHostManager.ts
+index c7e1f8b6..bb436d1f 100644
+--- a/src/vs/workbench/services/extensions/common/extensionHostManager.ts
++++ b/src/vs/workbench/services/extensions/common/extensionHostManager.ts
+@@ -310,8 +310,13 @@ export class ExtensionHostManager extends Disposable implements IExtensionHostMa
+ 			throw new Error(`Missing IExtensionHostProxy!`);
+ 		}
+ 
+-		// Check that no named customers are missing
+-		this._rpcProtocol.assertRegistered(mainProxyIdentifiers);
++		// Minv: features removed from the build leave their customers unregistered. Calls to those
++		// customers fail one by one; they must not stop the extension host from starting.
++		try {
++			this._rpcProtocol.assertRegistered(mainProxyIdentifiers);
++		} catch (err) {
++			this._logService.warn(`Extension host started without removed features: ${err instanceof Error ? err.message : err}`);
++		}
+ 
+ 		return extensionHostProxy;
+ 	}
