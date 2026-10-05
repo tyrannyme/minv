@@ -11,7 +11,7 @@
     "postinstall": "node node_modules/electron/install.js",
     "build": "node scripts/sandbox-build.mjs && tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.desktop.json && npm --prefix desktop/renderer run check",
-    "test": "npm run build && node --test dist/test/*.test.js",
+    "test": "npm run build && PATH=\"$PWD/node_modules/@vscode/ripgrep-universal/bin/linux-x64:$PATH\" node --test dist/test/*.test.js",
     "start": "node scripts/minv.mjs",
     "desktop:build": "npm run build && node scripts/desktop-build.mjs",
     "build:desktop": "npm run desktop:build",
