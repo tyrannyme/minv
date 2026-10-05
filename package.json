@@ -34,5 +34,9 @@
     "typescript": "^5.7.0",
     "vscode-oniguruma": "1.7.0",
     "vscode-textmate": "9.3.2"
+  },
+  "allowScripts": {
+    "electron@44.5.1": true,
+    "esbuild@0.28.2": true
   }
 }

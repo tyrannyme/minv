@@ -14,7 +14,7 @@
     "tokens": "node scripts/tokens.mjs",
     "fixture": "node scripts/fixture.mjs",
     "build": "node scripts/tokens.mjs && node scripts/fixture.mjs && ../../node_modules/.bin/tsc -p tsconfig.json",
-    "check": "../../node_modules/.bin/tsc -p tsconfig.json --noEmit",
+    "check": "node scripts/fixture.mjs && ../../node_modules/.bin/tsc -p tsconfig.json --noEmit",
     "test": "npm run build && node --test test/renderer.test.mjs",
     "serve": "node scripts/serve.mjs"
   }
