@@ -36,21 +36,9 @@ jobs:
       - name: Prepare the fork
         run: node scripts/fork-prepare.mjs
 
-      - name: Cache upstream dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            .upstream/build/node_modules
-            .upstream/build/build/node_modules
-            .upstream/build/remote/node_modules
-            .upstream/build/extensions/*/node_modules
-            ~/.cache/node-gyp
-          key: upstream-deps-${{ hashFiles('fork/upstream.json', 'fork/extensions-remove.json') }}
-
       - name: Install upstream dependencies
         working-directory: .upstream/build
-        run: |
-          if [ ! -d node_modules ]; then npm ci --no-audit --no-fund; fi
+        run: npm ci --no-audit --no-fund
 
       - name: Build
         working-directory: .upstream/build
