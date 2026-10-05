@@ -1,27 +1,36 @@
 # Develop Minv
 
-Minv currently boots as an isolated development extension in a Code-OSS-compatible desktop host. This implements the prototype route in PRD section 11.1. It is not yet the stripped, distributable Minv fork.
+Minv is a standalone Electron app: the core Git, file and search services in `src/core/`, the desktop host in `desktop/main/` and `desktop/preload/`, the Signal renderer in `desktop/renderer/`, and a text editor compiled from pinned Code-OSS source by `scripts/editor-build.mjs`.
 
-Requirements: Node.js 22+, npm, Git 2.48 or newer, and an installed Code-OSS-compatible executable. The pinned upstream fork requires Node.js 24.18.0.
+Requirements: Linux x64 with kernel 6.12 or newer (Landlock ABI 6), Git 2.48 or newer, a C compiler, Xvfb for the window tests, and Node.js 24.18.0 with npm.
 
 ```sh
-npm ci
-npm test
-npm start -- /absolute/path/to/workspace
+npm ci && npm --prefix desktop/renderer ci
+npm run upstream:fetch          # shallow fetch of the pinned Code-OSS commit into .upstream/vscode
+npm run desktop:build           # sandbox helper, core, editor (when its audit fails), renderer and app
+npm start -- /path/to/workspace
 ```
 
-The launcher uses `code` by default. Set `MINV_CODE_EXECUTABLE` to a Code-OSS executable to choose another host. It isolates application data and installed extensions under `.minv-dev/`, disables the legacy Git extension, and configures the development profile with telemetry, automatic extension updates, and automatic fetch off. It does not alter your ordinary editor profile. Upstream host functionality is still present; Minv-owned code does not embed an agent or provider service.
+## Checks
 
-The isolated launch profile defaults to the Minv Ink theme; Minv Paper is available through the color-theme picker. An empty editor opens Minv’s home page, also available as `Minv: Show Home`. Existing profile choices are preserved.
+| Command | What it proves |
+| --- | --- |
+| `npm run check` | Core, desktop and renderer type-check. |
+| `npm test` | Core Git, catalog, files, search, sandbox, session, update and watcher tests in temporary repositories. |
+| `npm run editor:audit` | The compiled editor matches the reviewed input list in `product/editor-inputs.json`. |
+| `node scripts/desktop-smoke.mjs` | Boots the real app in Xvfb against a disposable workspace, checks IPC, Git data, the editor and network denial, and captures the window. Set `MINV_SMOKE_GALLERY=1` to also capture the find bar, replace bar, go-to-line prompt and context menu. |
+| `node scripts/desktop-capture.mjs <workspace> [out]` | Opens any workspace in Xvfb, records when rows, branches and statuses arrive, and captures the window. |
+| `npm run desktop:package` | Builds and audits `build/release/minv-<version>-linux-x64.tar.gz`. |
 
-Open the Minv activity-bar icon for repositories. Select a row for its changes. Use the native editor's Files and Search views for browsing, editing, and searching. Change/diff inspection and Git writes require workspace trust; staging and committing open a review document and require confirmation. Git's configured hooks, filters, and signing are respected for trusted writes. Commit drafts survive cancellation and failure. Restricted workspaces expose branch metadata only: the prototype does not yet provide the PRD’s sandboxed passive content-inspection guarantee. Repository-config changes can race helper neutralization, which remains a release blocker.
+Changing the editor's contributions changes its compiled closure. Rebuild with `npm run editor:build`, review the difference, then update `product/editor-inputs.json` from `desktop/editor/generated/metafile.json`.
 
-Useful command-palette actions: `Minv: Select Repository`, `Minv: Refresh Selected Repository`, `Minv: Refresh All Repositories`, `Minv: Show Repository History`, and `Minv: Show Diagnostics`.
+## Continuous integration and releases
 
-## Validation
+`.github/workflows/ci.yml` runs every check above on pushes and pull requests and uploads the packaged archive. Pushing a tag `v<version>` that matches `package.json` runs the same pipeline and publishes the archive and its checksum as a GitHub release:
 
-`npm run test:host` boots a disposable editor profile, verifies activation, the repository view, refresh, text editing, and saving, and requires a result written by the test inside the host. This passed on the installed Code 1.135.0 Linux host.
+```sh
+npm version 0.2.0 --no-git-tag-version   # or edit package.json
+git commit -am "Release 0.2.0" && git tag v0.2.0 && git push origin main v0.2.0
+```
 
-`npm test` compiles the extension and runs core Git, catalog, write-freshness, controller race, and fixture tests in temporary repositories. Host smoke testing lives in `test/host/smoke.ts` and is run with the editor's `--extensionTestsPath` argument against a disposable workspace, never a user's repository.
-
-See [ACCEPTANCE.md](ACCEPTANCE.md) for release gates, [FORK.md](FORK.md) for the reproducible upstream preparation and exclusion audit, and [BENCHMARKS.md](BENCHMARKS.md) for measurement scope and fixture generation. Unimplemented release requirements remain explicit there.
+Releases are unsigned. The signed update channel in [UPDATES.md](UPDATES.md) is not wired to them yet.

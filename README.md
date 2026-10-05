@@ -1,26 +1,26 @@
 <p align="center">
-  <img alt="Minv: Minimal VS Code. Browse. Review. Commit." src="docs/readme-assets/banner.png">
+  <img alt="Minv. Every branch, at a glance. Browse. Review. Commit." src="docs/readme-assets/banner.png">
 </p>
 
 <p align="center">
-  <a href="#status"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/status-development_build-D2F74A.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=dark"><img alt="Status: development build" src="https://shieldcn.dev/badge/status-development_build-4A6800.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=light"></picture></a>
+  <a href="https://github.com/tyrannyme/minv/actions/workflows/ci.yml"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/tyrannyme/minv/ci.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=dark"><img alt="CI status" src="https://shieldcn.dev/github/tyrannyme/minv/ci.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=light"></picture></a>
+  <a href="https://github.com/tyrannyme/minv/releases"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/tyrannyme/minv/release.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=dark"><img alt="Latest release" src="https://shieldcn.dev/github/tyrannyme/minv/release.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=light"></picture></a>
   <a href="docs/PACKAGING.md"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Linux-x64.svg?variant=outline&amp;size=sm&amp;font=geist&amp;logo=linux&amp;mode=dark"><img alt="Linux x64" src="https://shieldcn.dev/badge/Linux-x64.svg?variant=outline&amp;size=sm&amp;font=geist&amp;logo=linux&amp;mode=light"></picture></a>
-  <a href="docs/EDITOR_BUILD.md"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Code--OSS-1.137.0.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=dark"><img alt="Code-OSS 1.137.0 editor" src="https://shieldcn.dev/badge/Code--OSS-1.137.0.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=light"></picture></a>
   <a href="docs/DESKTOP_ENGINEERING.md"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Electron-44.5.1.svg?variant=outline&amp;size=sm&amp;font=geist&amp;logo=electron&amp;mode=dark"><img alt="Electron 44.5.1" src="https://shieldcn.dev/badge/Electron-44.5.1.svg?variant=outline&amp;size=sm&amp;font=geist&amp;logo=electron&amp;mode=light"></picture></a>
   <a href="docs/GIT_RUNTIME.md"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Git-2.48%2B.svg?variant=outline&amp;size=sm&amp;font=geist&amp;logo=git&amp;mode=dark"><img alt="Git 2.48 or newer" src="https://shieldcn.dev/badge/Git-2.48%2B.svg?variant=outline&amp;size=sm&amp;font=geist&amp;logo=git&amp;mode=light"></picture></a>
   <a href="LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/license-MIT.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=dark"><img alt="MIT license" src="https://shieldcn.dev/badge/license-MIT.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=light"></picture></a>
 </p>
 
-<p align="center"><b>Min</b>imal <b>V</b>S Code: a desktop code browser and Git client for workspaces with dozens of repositories.</p>
+<p align="center">A desktop code browser, editor and Git client for workspaces with dozens of repositories.</p>
 
 > A small question about your code must never wait for the entire workspace.
 
 Open a workspace with forty submodules and ask which branch one of them is on. Minv answers from a stable repository list. It doesn't wait for every working-tree status, and rows don't move while information arrives.
 
-Minv is a standalone desktop app. It runs a text editor built from Code-OSS source inside its own Electron shell. There's no stock workbench, no extension host, and no AI. Use your agents, terminals, and IDEs next to it.
+Minv is a standalone desktop app with its own window, its own Git engine and a source-built text editor. There's no workbench, no extension host, and no AI. Use your agents, terminals, and IDEs next to it.
 
 <p align="center">
-  <img alt="The Minv desktop window: a repository list on the left, the selected repository's staged and unstaged changes in the middle, and a Code-OSS editor on the right" src="docs/readme-assets/minv-desktop.png">
+  <img alt="The Minv desktop window: a repository list on the left, the selected repository's staged and unstaged changes in the middle, and the editor on the right" src="docs/readme-assets/minv-desktop.png">
 </p>
 
 <p align="center"><sub>Not a mockup. This is the Linux x64 development build, captured by <a href="scripts/desktop-smoke.mjs"><code>scripts/desktop-smoke.mjs</code></a> against a throwaway workspace with submodules.</sub></p>
@@ -42,17 +42,27 @@ Minv is a standalone desktop app. It runs a text editor built from Code-OSS sour
 ## Status
 
 > [!IMPORTANT]
-> **Minv is a development build. It has no release yet.** The desktop app boots on Linux x64 with the source-built editor, the custom shell, and live Git. Release validation is still in progress, and every PRD requirement and release gate is still open. [docs/COMPLETION.md](docs/COMPLETION.md) tracks each one with its evidence.
+> **Minv is a development build.** Tagged builds are published on [Releases](https://github.com/tyrannyme/minv/releases) as unsigned Linux x64 archives. The desktop app boots with the source-built editor, the custom shell, and live Git. Release validation is still in progress, and every PRD requirement and release gate is still open. [docs/COMPLETION.md](docs/COMPLETION.md) tracks each one with its evidence.
 
 | Piece | Where it stands |
 | --- | --- |
-| Code-OSS editor | Built from upstream `1.137.0` source with a reviewed, audited input closure. Its sandboxed Electron smoke test passes. |
+| Editor | Built from Code-OSS `1.137.0` source with a reviewed, audited input closure. Its sandboxed Electron smoke test passes. |
 | Desktop shell | Boots against a live multi-repository Git workspace. Runs sandboxed, with context isolation and a local-only protocol. The latest packaged-app smoke run ([`scripts/desktop-smoke.mjs`](scripts/desktop-smoke.mjs)) passes. |
 | Passive Git sandbox | Landlock and seccomp confinement, with adversarial tests on Linux. |
 | Packaging | The Linux x64 packaging script and audit exist. The archive isn't signed, and there's no updater. |
-| Performance budgets | End-to-end budgets such as launch-to-painted-branch **have not been measured** yet. |
+| Performance | On a real 49-repository workspace (48 submodules), every branch is verified about 2.7 s after launch and every status about 3.4 s after (warm disk, [`scripts/desktop-capture.mjs`](scripts/desktop-capture.mjs)). The PRD's controlled budgets **have not been measured** yet. |
 
 Only Linux x64 is targeted. Windows and macOS aren't built.
+
+## Install
+
+Download `minv-<version>-linux-x64.tar.gz` from [Releases](https://github.com/tyrannyme/minv/releases), check it against its `.sha256`, extract it anywhere, and run:
+
+```sh
+minv-<version>-linux-x64/bin/minv /path/to/workspace
+```
+
+You need Linux x64 with kernel 6.12 or newer and Git 2.48 or newer. Everything else ships in the archive. [docs/PACKAGING.md](docs/PACKAGING.md) covers adding it to your PATH and app launcher.
 
 ## Build and run
 
@@ -78,7 +88,7 @@ npm start -- --help
 
 ```sh
 npm test                                # core Git, catalog, file, and sandbox tests in temporary repositories
-npm run check                           # type-check the extension, desktop, and renderer
+npm run check                           # type-check core, desktop, and renderer
 npm run editor:audit                    # verify the editor build against its reviewed source closure
 npm run editor:test                     # sandboxed Electron smoke test of the editor
 node scripts/desktop-smoke.mjs          # boot the real app against a disposable workspace and take a screenshot
@@ -107,7 +117,7 @@ No step downloads and runs a remote package. Everything uses the tools `npm ci` 
 | [docs/EDITOR_BUILD.md](docs/EDITOR_BUILD.md) | The source-built editor, provenance, and exclusions |
 | [docs/GIT_RUNTIME.md](docs/GIT_RUNTIME.md) | The passive Git sandbox and scheduling |
 | [docs/PACKAGING.md](docs/PACKAGING.md) | Linux packaging, the CLI, and installation |
-| [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | The earlier extension prototype, kept as a development harness |
+| [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Building, testing, capturing, and releasing |
 
 ## License
 

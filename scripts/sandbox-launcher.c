@@ -23,6 +23,19 @@
 
 extern char **environ;
 
+/* Landlock ABI 6 layout and flags, declared here so older kernel headers can still build the launcher.
+   The running kernel's ABI is checked before any of them are used. */
+struct minv_landlock_ruleset_attr { __u64 handled_access_fs; __u64 handled_access_net; __u64 scoped; };
+#ifndef LANDLOCK_ACCESS_FS_IOCTL_DEV
+#define LANDLOCK_ACCESS_FS_IOCTL_DEV (1ULL << 15)
+#endif
+#ifndef LANDLOCK_SCOPE_ABSTRACT_UNIX_SOCKET
+#define LANDLOCK_SCOPE_ABSTRACT_UNIX_SOCKET (1ULL << 0)
+#endif
+#ifndef LANDLOCK_SCOPE_SIGNAL
+#define LANDLOCK_SCOPE_SIGNAL (1ULL << 1)
+#endif
+
 static void fail(const char *message) {
   fprintf(stderr, "Minv Git sandbox: %s: %s\n", message, strerror(errno));
   exit(126);
@@ -31,7 +44,7 @@ static void fail(const char *message) {
 static void readonly_landlock(int executable) {
   int abi = syscall(SYS_landlock_create_ruleset, NULL, 0, LANDLOCK_CREATE_RULESET_VERSION);
   if (abi < 6) { errno = ENOTSUP; fail("Linux Landlock ABI 6 or newer is required"); }
-  struct landlock_ruleset_attr rules = {
+  struct minv_landlock_ruleset_attr rules = {
     .handled_access_fs = LANDLOCK_ACCESS_FS_EXECUTE | LANDLOCK_ACCESS_FS_WRITE_FILE |
       LANDLOCK_ACCESS_FS_REMOVE_DIR | LANDLOCK_ACCESS_FS_REMOVE_FILE | LANDLOCK_ACCESS_FS_MAKE_CHAR |
       LANDLOCK_ACCESS_FS_MAKE_DIR | LANDLOCK_ACCESS_FS_MAKE_REG | LANDLOCK_ACCESS_FS_MAKE_SOCK |
