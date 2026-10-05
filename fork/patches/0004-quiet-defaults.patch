@@ -1,0 +1,26 @@
+diff --git a/src/vs/workbench/browser/parts/globalCompositeBar.ts b/src/vs/workbench/browser/parts/globalCompositeBar.ts
+index 6aec4cf9..e7e1a4a7 100644
+--- a/src/vs/workbench/browser/parts/globalCompositeBar.ts
++++ b/src/vs/workbench/browser/parts/globalCompositeBar.ts
+@@ -840,7 +840,7 @@ function simpleActivityContextMenuActions(storageService: IStorageService, isAcc
+ }
+ 
+ export function isAccountsActionVisible(storageService: IStorageService): boolean {
+-	return storageService.getBoolean(AccountsActivityActionViewItem.ACCOUNTS_VISIBILITY_PREFERENCE_KEY, StorageScope.PROFILE, true);
++	return storageService.getBoolean(AccountsActivityActionViewItem.ACCOUNTS_VISIBILITY_PREFERENCE_KEY, StorageScope.PROFILE, false); // Minv: no accounts
+ }
+ 
+ function setAccountsActionVisible(storageService: IStorageService, visible: boolean) {
+diff --git a/src/vs/workbench/contrib/scm/browser/scm.contribution.ts b/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
+index 6ee2a32c..bab4b736 100644
+--- a/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
++++ b/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
+@@ -94,7 +94,7 @@ viewsRegistry.registerViews([{
+ 	singleViewPaneContainerTitle: localize('source control repositories', "Source Control Repositories"),
+ 	ctorDescriptor: new SyncDescriptor(SCMRepositoriesViewPane),
+ 	canToggleVisibility: true,
+-	hideByDefault: true,
++	hideByDefault: false, // Minv: submodule branches at a glance
+ 	canMoveView: true,
+ 	weight: 20,
+ 	order: 0,
