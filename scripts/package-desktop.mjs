@@ -13,7 +13,7 @@ const json = async file => JSON.parse(await readFile(file, 'utf8'));
 const hash = async file => createHash('sha256').update(await readFile(file)).digest('hex');
 const forward = value => value.split(path.sep).join('/');
 const forbidden = /(?:^|\/)(?:node_modules|extensions|extensionHost|extension-host|chat|debug|debugger|terminal|ptyHost|pty-host|providers|agent|agents|server|code-server|remote)(?:\/|\.|$)/i;
-const appAllowed = /^(?:package\.json|design-tokens\.(?:json|css)|main\.cjs|preload\.cjs|bootstrap\.js|index\.html|native\/(?:minv-git-sandbox|rg|notices\/[A-Za-z0-9_./-]+\.(?:txt|md|json|lock))|renderer\/dist\/[A-Za-z0-9_./-]+\.js|renderer\/styles\/[A-Za-z0-9_./-]+\.css|(?:renderer\/assets|assets|media|brand)\/[A-Za-z0-9_./@-]+\.(?:woff2?|ttf|otf|svg|png|webp|jpe?g|txt|json)|editor\/[A-Za-z0-9_./@-]+)$/i;
+const appAllowed = /^(?:package\.json|design-tokens\.(?:json|css)|main\.cjs|preload\.cjs|bootstrap\.js|index\.html|native\/(?:minv-git-sandbox|rg|notices\/[A-Za-z0-9_./+-]+\.(?:txt|md|json|lock))|renderer\/dist\/[A-Za-z0-9_./-]+\.js|renderer\/styles\/[A-Za-z0-9_./-]+\.css|(?:renderer\/assets|assets|media|brand)\/[A-Za-z0-9_./@-]+\.(?:woff2?|ttf|otf|svg|png|webp|jpe?g|txt|json)|editor\/[A-Za-z0-9_./@() +-]+)$/i;
 const electronAllowed = new Set([
   'electron', 'LICENSE', 'LICENSES.chromium.html', 'chrome-sandbox', 'chrome_crashpad_handler',
   'chrome_100_percent.pak', 'chrome_200_percent.pak', 'icudtl.dat', 'libEGL.so', 'libGLESv2.so',
@@ -71,7 +71,7 @@ async function auditBundleGraph() {
     if (!record?.inputs || !record?.outputs) throw new Error('Desktop bundle metadata must contain esbuild input and output graphs.');
     for (const source of Object.keys(record.inputs)) {
       const normalized = forward(source);
-      if (forbidden.test(normalized) || /(?:^|\/)src\/(?:extension|controller|ui)(?:\.|\/)/.test(normalized)) {
+      if (forbidden.test(normalized)) {
         throw new Error(`Excluded implementation in desktop graph: ${source}`);
       }
       if (!/^(?:src\/core\/|desktop\/(?:main|preload|renderer|editor|shared)\/)/.test(normalized)) {
