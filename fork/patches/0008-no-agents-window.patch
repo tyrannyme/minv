@@ -1,0 +1,102 @@
+diff --git a/build/buildfile.ts b/build/buildfile.ts
+index c2dbccb4..fd8dd100 100644
+--- a/build/buildfile.ts
++++ b/build/buildfile.ts
+@@ -23,13 +23,9 @@ export const workerBackgroundTokenization = createModuleDescription('vs/workbenc
+ export const workbenchDesktop = [
+ 	createModuleDescription('vs/workbench/contrib/debug/node/telemetryApp'),
+ 	createModuleDescription('vs/platform/files/node/watcher/watcherMain'),
+-	createModuleDescription('vs/platform/localTranscription/node/localTranscriptionMain'),
+ 	createModuleDescription('vs/platform/terminal/node/ptyHostMain'),
+-	createModuleDescription('vs/platform/agentHost/node/agentHostMain'),
+-	createModuleDescription('vs/platform/agentHost/node/diffWorkerMain'),
+ 	createModuleDescription('vs/workbench/api/node/extensionHostProcess'),
+ 	createModuleDescription('vs/workbench/workbench.desktop.main'),
+-	createModuleDescription('vs/sessions/sessions.desktop.main')
+ ];
+ 
+ export const workbenchWeb = createModuleDescription('vs/workbench/workbench.web.main.internal');
+@@ -48,7 +44,6 @@ export const code = [
+ 	createModuleDescription('vs/code/node/cliProcessMain'),
+ 	createModuleDescription('vs/code/electron-utility/sharedProcess/sharedProcessMain'),
+ 	createModuleDescription('vs/code/electron-browser/workbench/workbench'),
+-	createModuleDescription('vs/sessions/electron-browser/sessions'),
+ ];
+ 
+ export const codeWeb = createModuleDescription('vs/code/browser/workbench/workbench');
+@@ -59,8 +54,6 @@ export const codeServer = [
+ 	createModuleDescription('vs/workbench/api/node/extensionHostProcess'),
+ 	createModuleDescription('vs/platform/files/node/watcher/watcherMain'),
+ 	createModuleDescription('vs/platform/terminal/node/ptyHostMain'),
+-	createModuleDescription('vs/platform/agentHost/node/agentHostMain'),
+-	createModuleDescription('vs/platform/agentHost/node/diffWorkerMain'),
+ ];
+ 
+ export const entrypoint = createModuleDescription;
+diff --git a/build/next/index.ts b/build/next/index.ts
+index 42bc4daf..3d7a5017 100644
+--- a/build/next/index.ts
++++ b/build/next/index.ts
+@@ -98,13 +98,9 @@ const desktopWorkerEntryPoints = [
+ // Desktop workbench and code entry points
+ const desktopEntryPoints = [
+ 	'vs/workbench/workbench.desktop.main',
+-	'vs/sessions/sessions.desktop.main',
+ 	'vs/workbench/contrib/debug/node/telemetryApp',
+ 	'vs/platform/files/node/watcher/watcherMain',
+-	'vs/platform/localTranscription/node/localTranscriptionMain',
+ 	'vs/platform/terminal/node/ptyHostMain',
+-	'vs/platform/agentHost/node/agentHostMain',
+-	'vs/platform/agentHost/node/diffWorkerMain',
+ 	'vs/workbench/api/node/extensionHostProcess',
+ ];
+ 
+@@ -112,7 +108,6 @@ const codeEntryPoints = [
+ 	'vs/code/node/cliProcessMain',
+ 	'vs/code/electron-utility/sharedProcess/sharedProcessMain',
+ 	'vs/code/electron-browser/workbench/workbench',
+-	'vs/sessions/electron-browser/sessions',
+ ];
+ 
+ // Web entry points (used in server-web and vscode-web)
+@@ -138,8 +133,6 @@ const serverEntryPoints = [
+ 	'vs/workbench/api/node/extensionHostProcess',
+ 	'vs/platform/files/node/watcher/watcherMain',
+ 	'vs/platform/terminal/node/ptyHostMain',
+-	'vs/platform/agentHost/node/agentHostMain',
+-	'vs/platform/agentHost/node/diffWorkerMain',
+ ];
+ 
+ // Bootstrap files per target
+@@ -216,8 +209,6 @@ function getCssBundleEntryPointsForTarget(target: BuildTarget): Set<string> {
+ 			return new Set([
+ 				'vs/workbench/workbench.desktop.main',
+ 				'vs/code/electron-browser/workbench/workbench',
+-				'vs/sessions/sessions.desktop.main',
+-				'vs/sessions/electron-browser/sessions',
+ 			]);
+ 		case 'server':
+ 			return new Set(); // Server has no UI
+diff --git a/build/gulpfile.vscode.ts b/build/gulpfile.vscode.ts
+index b9c9efa7..9b1c76f0 100644
+--- a/build/gulpfile.vscode.ts
++++ b/build/gulpfile.vscode.ts
+@@ -79,7 +79,6 @@ const vscodeResourceIncludes = [
+ 
+ 	// Workbench
+ 	'out-build/vs/code/electron-browser/workbench/workbench.html',
+-	'out-build/vs/sessions/electron-browser/sessions.html',
+ 
+ 	// Electron Preload
+ 	'out-build/vs/base/parts/sandbox/electron-browser/preload.js',
+@@ -283,10 +282,6 @@ function packageTask(platform: string, arch: string, sourceFolderName: string, d
+ 			'vs/workbench/api/node/extensionHostProcess.js',
+ 			'vs/code/electron-browser/workbench/workbench.html',
+ 			'vs/code/electron-browser/workbench/workbench.js',
+-			'vs/sessions/sessions.desktop.main.js',
+-			'vs/sessions/sessions.desktop.main.css',
+-			'vs/sessions/electron-browser/sessions.html',
+-			'vs/sessions/electron-browser/sessions.js'
+ 		]);
+ 
+ 		const src = gulp.src(out + '/**', { base: '.' })

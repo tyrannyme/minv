@@ -2,5 +2,3 @@ node_modules/
 .upstream/
 .minv-dev/
 build/
-HANDOFF.md
-docs/NAME_REVIEW.md

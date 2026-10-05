@@ -15,7 +15,7 @@ When your agents do the work, you still open an editor now and then: to read a f
 
 **What's in it:** the Explorer, Quick Open, search, the editor, the integrated terminal, and Source Control with VS Code's own Git (staging, commits, branches, push and pull, the graph). It also renders Markdown previews. Every submodule's branch shows in the Repositories list, and all 48 submodules of a large workspace open by default.
 
-**What's taken out:** debugging, testing, AI chat and agents, inline completions, the integrated browser, accounts and settings sync, remote development, the extension marketplace, notebooks, language servers, welcome pages and surveys. There's no telemetry.
+**What's taken out:** debugging, testing, AI chat, agents and the Agents window, inline completions, the integrated browser, accounts and settings sync, remote development, the extension marketplace, notebooks, language servers, welcome pages and surveys. There's no telemetry.
 
 ## Install
 
@@ -25,7 +25,7 @@ Download `minv-<version>-linux-x64.tar.gz` from [Releases](https://github.com/ty
 minv-<version>-linux-x64/bin/minv /path/to/workspace
 ```
 
-Linux x64 only for now. Minv keeps its settings in `~/.config/Minv` and `~/.minv`, separate from VS Code's.
+Linux x64 only for now, about 180 MB to download. You need Git installed. Minv keeps its settings in `~/.config/Minv` and `~/.minv`, separate from VS Code's, and it's a development build: unsigned, with no auto-update.
 
 ## Build
 
@@ -53,9 +53,9 @@ Minv's changes to Code-OSS live in [`fork/`](fork). [`scripts/fork-prepare.mjs`]
 | [`fork/product.json`](fork/product.json) | Name, data folders, and default settings |
 | [`fork/extensions/minv-theme`](fork/extensions/minv-theme) | Minv Dark and Minv Light |
 | [`fork/overlay`](fork/overlay) | Icons and the bundled Instrument Sans and Commit Mono fonts |
-| [`fork/patches`](fork/patches) | Small source patches, each one commented |
+| [`fork/patches`](fork/patches) | Small source and build patches, each one commented |
 
-VS Code's chat and MCP services stay registered, though nothing uses them, because Tasks and the terminal depend on them. `chat.disableAIFeatures` is on, and every AI view, command and extension is removed.
+VS Code's chat and MCP services stay registered, though nothing uses them, because Tasks and the terminal depend on them. `chat.disableAIFeatures` is on, and every AI view, extension and the Agents window are removed.
 
 Pushing a tag `v<version>` that matches `package.json` builds, smoke-tests and publishes a release.
 

@@ -53,6 +53,8 @@
     "scm.alwaysShowRepositories": true,
     "scm.repositories.visible": 12,
     "markdown.preview.fontFamily": "'Instrument Sans', system-ui, sans-serif",
-    "scm.repositories.selectionMode": "single"
+    "scm.repositories.selectionMode": "single",
+    "terminal.integrated.suggest.enabled": false,
+    "terminal.integrated.shellIntegration.suggestEnabled": false
   }
 }
