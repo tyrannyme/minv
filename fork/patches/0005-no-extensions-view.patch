@@ -1,0 +1,12 @@
+diff --git a/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts b/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
+index b06c588b..8b5f1a33 100644
+--- a/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
++++ b/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
+@@ -127,6 +127,7 @@ export const VIEW_CONTAINER = Registry.as<IViewContainersRegistry>(ViewContainer
+ 		order: 4,
+ 		rejectAddedViews: true,
+ 		alwaysUseContainerInfo: true,
++		hideIfEmpty: true, // Minv: no marketplace, no Extensions view
+ 	}, ViewContainerLocation.Sidebar);
+ 
+ Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Configuration)

@@ -26,7 +26,8 @@ if (!xvfb) throw new Error('xvfb-run is required.');
 const env = { ...process.env, VSCODE_SKIP_PRELAUNCH: '1' };
 for (const name of ['ELECTRON_RUN_AS_NODE', 'WAYLAND_DISPLAY']) delete env[name];
 const started = Date.now();
-const child = spawn(xvfb, ['-a', '--server-args=-screen 0 1600x1000x24', join(source, 'scripts/code.sh'), workspace,
+const opened = option('open') ? [resolve(workspace, option('open'))] : [];
+const child = spawn(xvfb, ['-a', '--server-args=-screen 0 1600x1000x24', join(source, 'scripts/code.sh'), workspace, ...opened,
   '--user-data-dir', join(profile, 'data'), '--extensions-dir', join(profile, 'extensions'), `--remote-debugging-port=${port}`,
   ...(process.env.MINV_FORK_ARGS ? process.env.MINV_FORK_ARGS.split(' ') : []), '--disable-workspace-trust', '--skip-welcome', '--skip-release-notes', '--ozone-platform=x11', '--force-device-scale-factor=1'],
   { cwd: source, env, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
@@ -62,6 +63,18 @@ try {
   for (let i = 0; i < 300 && !(await evaluate(`!!document.querySelector('.monaco-workbench .part.sidebar')`)); i++) await delay(100);
   console.log(`Workbench painted after ${Date.now() - started} ms`);
   await delay(wait);
+  // --keys=ctrl+shift+v,escape presses each chord in order, one second apart.
+  for (const chord of (option('keys') ?? '').split(',').filter(Boolean)) {
+    const parts = chord.toLowerCase().split('+'); const key = parts.pop();
+    const modifiers = (parts.includes('alt') ? 1 : 0) | (parts.includes('ctrl') ? 2 : 0) | (parts.includes('meta') ? 4 : 0) | (parts.includes('shift') ? 8 : 0);
+    const named = { escape: ['Escape', 27], enter: ['Enter', 13], tab: ['Tab', 9] }[key];
+    const code = named ? named[1] : key.toUpperCase().charCodeAt(0);
+    const keyName = named ? named[0] : key;
+    const codeName = named ? named[0] : /[a-z]/.test(key) ? `Key${key.toUpperCase()}` : `Digit${key}`;
+    for (const type of ['rawKeyDown', 'keyUp']) await send('Input.dispatchKeyEvent', { type, modifiers, key: keyName, code: codeName, windowsVirtualKeyCode: code, nativeVirtualKeyCode: code });
+    await delay(1000);
+  }
+  if (option('keys')) await delay(Number(option('after') ?? 3000));
   if (option('eval')) console.log('eval:', JSON.stringify(await evaluate(option('eval'))));
   if (problems.length) console.log(`Renderer problems:\n${[...new Set(problems)].slice(0, 15).map(p => String(p).slice(0, 600)).join('\n---\n')}`);
   const shot = await send('Page.captureScreenshot', { format: 'png' });
