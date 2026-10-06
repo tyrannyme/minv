@@ -1,7 +1,7 @@
 {
   "name": "minv",
   "description": "VS Code, cut down to reading, Markdown, changes, commits and branches.",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "license": "MIT",
   "engines": {
@@ -12,7 +12,7 @@
     "setup": "node scripts/fork-prepare.mjs && cd .upstream/build && npm ci --no-audit --no-fund",
     "compile": "node scripts/fork-prepare.mjs && cd .upstream/build && npm run compile-client && npm run electron",
     "start": ".upstream/build/scripts/code.sh",
-    "build": "node scripts/fork-prepare.mjs && BUILD_SOURCEVERSION=$(git rev-parse HEAD) && cd .upstream/build && BUILD_SOURCEVERSION=$BUILD_SOURCEVERSION npm run gulp vscode-linux-x64-min",
+    "build": "node scripts/fork-prepare.mjs && BUILD_SOURCEVERSION=$(git rev-parse HEAD) npm --prefix .upstream/build run gulp vscode-linux-x64-min",
     "package": "node scripts/fork-package.mjs",
     "capture": "node scripts/fork-capture.mjs"
   }

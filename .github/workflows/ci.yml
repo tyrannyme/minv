@@ -16,31 +16,55 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   build:
     name: Build, smoke test and package (Linux x64)
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 90
+    env:
+      # The sysroot and toolchain downloads go through the GitHub API.
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v5
 
+      - name: Check tag matches package version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if [ "${GITHUB_REF_NAME}" != "v${version}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match package.json version ${version}"
+            exit 1
+          fi
+
       - uses: actions/setup-node@v5
         with:
-          node-version: 24.18.0
+          node-version-file: package.json
 
       - name: Install build dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq libxkbfile-dev libsecret-1-dev libkrb5-dev xvfb
+          sudo apt-get install -y -qq libxkbfile-dev libsecret-1-dev libkrb5-dev xvfb fakeroot rpm dpkg-dev python-is-python3
           # Electron's renderer sandbox needs unprivileged user namespaces.
           sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
 
       - name: Prepare the fork
         run: node scripts/fork-prepare.mjs
 
+      # Native modules are compiled the way upstream does it: Chromium's clang against a glibc 2.28 sysroot, so the
+      # packages run on the same distributions as VS Code instead of only on this runner's glibc.
       - name: Install upstream dependencies
         working-directory: .upstream/build
-        run: npm ci --no-audit --no-fund
+        env:
+          VSCODE_ARCH: x64
+          npm_config_arch: x64
+        run: |
+          source build/azure-pipelines/linux/setup-env.sh
+          node build/npm/preinstall.ts
+          npm ci --no-audit --no-fund
 
       - name: Build
         working-directory: .upstream/build
@@ -54,26 +78,47 @@ jobs:
           git init -q -b main /tmp/smoke && git -C /tmp/smoke -c user.name=ci -c user.email=ci@minv.invalid commit -q --allow-empty -m init
           node scripts/fork-capture.mjs /tmp/smoke build/smoke.png --app=.upstream/VSCode-linux-x64/minv --wait=8000 \
             --eval="document.querySelector('.statusbar')?.innerText" | tee build/smoke.log
+          grep -q '^Workbench painted' build/smoke.log
           grep -q 'eval:.*main' build/smoke.log
+
+      - name: Package
+        run: node scripts/fork-package.mjs
+
+      - name: Check glibc floor
+        run: |
+          # Fails if anything shipped needs a newer glibc than the 2.28 sysroot provides.
+          floor=$(find .upstream/VSCode-linux-x64 -type f \( -name '*.node' -o -name minv \) -exec objdump -T {} + 2>/dev/null \
+            | grep -o 'GLIBC_[0-9.]*' | sort -uV | tail -1)
+          echo "Highest glibc symbol: ${floor}"
+          [ "$(printf '%s\n' "${floor#GLIBC_}" 2.28 | sort -V | tail -1)" = 2.28 ]
+
+      - name: Install and smoke test the .deb
+        run: |
+          sudo apt-get install -y -qq ./build/release/minv-linux-x64.deb
+          dpkg -s minv | grep -E '^(Version|Depends)'
+          node scripts/fork-capture.mjs /tmp/smoke build/smoke-deb.png --app=/usr/share/minv/minv --wait=5000 \
+            --eval="document.querySelector('.statusbar')?.innerText" | tee build/smoke-deb.log
+          grep -q 'eval:.*main' build/smoke-deb.log
+          sudo apt-get remove -y -qq minv
+
+      - name: Install the .rpm on Fedora
+        run: |
+          docker run --rm -v "$PWD/build/release:/release:ro" fedora:latest \
+            bash -c 'dnf install -y -q /release/minv-linux-x64.rpm && rpm -q minv && test -x /usr/bin/minv'
 
       - name: Upload smoke evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: smoke
-          path: build/smoke.*
+          path: build/smoke*
           if-no-files-found: ignore
 
-      - name: Package
-        run: node scripts/fork-package.mjs
-
-      - name: Upload package
+      - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
           name: minv-linux-x64
-          path: |
-            build/release/*.tar.gz
-            build/release/*.tar.gz.sha256
+          path: build/release/*
           if-no-files-found: error
 
   release:
@@ -84,18 +129,6 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Check tag matches package version
-        id: version
-        run: |
-          version=$(node -p "require('./package.json').version")
-          if [ "${GITHUB_REF_NAME}" != "v${version}" ]; then
-            echo "::error::Tag ${GITHUB_REF_NAME} does not match package.json version ${version}"
-            exit 1
-          fi
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
-
       - uses: actions/download-artifact@v4
         with:
           name: minv-linux-x64
@@ -104,9 +137,21 @@ jobs:
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ steps.version.outputs.version }}
+          GH_REPO: ${{ github.repository }}
         run: |
+          version=${GITHUB_REF_NAME#v}
           prerelease=""
-          case "$VERSION" in 0.*|*-*) prerelease="--prerelease" ;; esac
+          case "$version" in 0.*|*-*) prerelease="--prerelease" ;; esac
+          cat > notes.md <<'EOF'
+          ## Install
+
+          | Distribution | Download | Install |
+          | --- | --- | --- |
+          | Debian, Ubuntu | `minv-linux-x64.deb` | `sudo apt install ./minv-linux-x64.deb` |
+          | Fedora, RHEL, openSUSE | `minv-linux-x64.rpm` | `sudo dnf install ./minv-linux-x64.rpm` |
+          | Any distribution | `minv-linux-x64.tar.gz` | `tar xzf minv-linux-x64.tar.gz && minv-linux-x64/bin/minv` |
+
+          Check a download with `sha256sum -c --ignore-missing SHA256SUMS`. You need Git installed.
+          EOF
           gh release create "$GITHUB_REF_NAME" release/* \
-            --title "Minv $VERSION" --generate-notes --verify-tag $prerelease
+            --title "Minv $version" --notes-file notes.md --generate-notes --verify-tag $prerelease

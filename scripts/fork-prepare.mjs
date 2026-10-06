@@ -14,15 +14,15 @@ const build = join(root, '.upstream/build');
 const json = file => JSON.parse(readFileSync(file, 'utf8'));
 const git = (cwd, ...args) => execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] });
 
-// A shallow fetch of exactly the pinned commit. No tags, history or other branches.
-if (!existsSync(build)) {
+// A shallow fetch of exactly the pinned commit. No tags, history or other branches. Fetches again when the pin
+// changes or an earlier fetch was interrupted.
+if (!existsSync(join(build, '.git'))) {
   mkdirSync(build, { recursive: true });
   git(build, 'init', '--quiet');
   git(build, 'remote', 'add', 'origin', pin.repository);
-  git(build, 'fetch', '--quiet', '--depth=1', 'origin', pin.commit);
 }
+try { git(build, 'cat-file', '-e', `${pin.commit}^{commit}`); } catch { git(build, 'fetch', '--quiet', '--depth=1', 'origin', pin.commit); }
 git(build, 'checkout', '--quiet', '--detach', '--force', pin.commit);
-git(build, 'reset', '--hard', '--quiet', pin.commit);
 git(build, 'clean', '-fdq');
 
 // 1. Workbench features Minv does not register.
@@ -38,16 +38,17 @@ for (const [file, contributions] of Object.entries(json(join(fork, 'strip.json')
 }
 
 // 2. Built-in extensions Minv does not ship.
-for (const name of json(join(fork, 'extensions-remove.json'))) {
+const removed = json(join(fork, 'extensions-remove.json'));
+for (const name of removed) {
   if (!existsSync(join(build, 'extensions', name))) throw new Error(`Upstream has no extension ${name}; review fork/extensions-remove.json.`);
   rmSync(join(build, 'extensions', name), { recursive: true, force: true });
 }
 
 // Build lists name every extension to compile; drop the entries for removed ones.
-const removed = json(join(fork, 'extensions-remove.json'));
+const names = removed.map(name => new RegExp(`['"](?:extensions/)?${name.replace(/[-.]/g, '\\$&')}(?:/|['"])`));
 for (const file of ['build/gulpfile.extensions.ts', 'build/lib/extensions.ts', 'build/npm/dirs.ts']) {
   const lines = readFileSync(join(build, file), 'utf8').split('\n');
-  const kept = lines.filter(line => !(/,\s*$/.test(line) && removed.some(name => new RegExp(`['"](?:extensions/)?${name.replace(/[-.]/g, '\\$&')}(?:/|['"])`).test(line))));
+  const kept = lines.filter(line => !(/,\s*$/.test(line) && names.some(name => name.test(line))));
   writeFileSync(join(build, file), kept.join('\n'));
 }
 
