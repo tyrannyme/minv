@@ -35,8 +35,7 @@
     "share/browser/share.contribution.js",
     "inlineCompletions/browser/inlineCompletions.contribution.js",
     "editTelemetry/browser/editTelemetry.contribution.js",
-    "emmet/browser/emmet.contribution.js",
-    "extensions/browser/extensionsViewlet.js"
+    "emmet/browser/emmet.contribution.js"
   ],
   "src/vs/workbench/workbench.desktop.main.ts": [
     "issue/electron-browser/issue.contribution.js",

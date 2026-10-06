@@ -36,10 +36,8 @@
     "workbench.startupEditor": "none",
     "workbench.tips.enabled": false,
     "workbench.layoutControl.enabled": false,
-    "workbench.welcomePage.walkthroughs.openOnInstall": false,
     "workbench.secondarySideBar.defaultVisibility": "hidden",
     "chat.disableAIFeatures": true,
-    "chat.commandCenter.enabled": false,
     "editor.fontFamily": "'Commit Mono', 'Adwaita Mono', monospace",
     "editor.fontSize": 13,
     "editor.lineHeight": 20,
@@ -54,7 +52,6 @@
     "scm.repositories.visible": 12,
     "markdown.preview.fontFamily": "'Instrument Sans', system-ui, sans-serif",
     "scm.repositories.selectionMode": "single",
-    "terminal.integrated.suggest.enabled": false,
-    "terminal.integrated.shellIntegration.suggestEnabled": false
+    "terminal.integrated.suggest.enabled": false
   }
 }
