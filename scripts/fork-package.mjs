@@ -64,8 +64,9 @@ exec "$here/usr/share/minv/minv" --no-sandbox "$@"
     gulp('vscode-win32-x64-user-setup');
     copyFileSync(only(join(source, '.build/win32-x64/user-setup'), '.exe'), join(release, 'minv-win32-x64-setup.exe'));
   } else if (format === 'zip') {
-    // Windows' own bsdtar (not Git Bash's GNU tar) writes a zip when the name ends in .zip; -s renames the top folder.
-    execFileSync(join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', 'tar.exe'), ['-a', '-c', '-f', join(release, 'minv-win32-x64.zip'), '-s', ',^VSCode-win32-x64,minv-win32-x64,', '-C', '.upstream', 'VSCode-win32-x64'], { cwd: root, stdio: 'inherit' });
+    // Windows' own bsdtar (not Git Bash's GNU tar) writes a zip when the name ends in .zip. Like VS Code's zip, it
+    // has no top folder; Extract All names the folder after the zip.
+    execFileSync(join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', 'tar.exe'), ['-a', '-c', '-f', join(release, 'minv-win32-x64.zip'), '-C', built, '.'], { stdio: 'inherit' });
   } else {
     throw new Error(`Unknown format ${format}; use tar, deb, rpm, appimage, exe or zip.`);
   }
