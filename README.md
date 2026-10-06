@@ -25,15 +25,20 @@ Download a package from the [latest release](https://github.com/tyrannyme/minv/r
 | --- | --- | --- |
 | Debian, Ubuntu | [`minv-linux-x64.deb`](https://github.com/tyrannyme/minv/releases/latest/download/minv-linux-x64.deb) | `sudo apt install ./minv-linux-x64.deb` |
 | Fedora, RHEL, openSUSE | [`minv-linux-x64.rpm`](https://github.com/tyrannyme/minv/releases/latest/download/minv-linux-x64.rpm) | `sudo dnf install ./minv-linux-x64.rpm` |
+| Any distribution | [`minv-linux-x64.AppImage`](https://github.com/tyrannyme/minv/releases/latest/download/minv-linux-x64.AppImage) | `chmod +x minv-linux-x64.AppImage` |
 | Any distribution | [`minv-linux-x64.tar.gz`](https://github.com/tyrannyme/minv/releases/latest/download/minv-linux-x64.tar.gz) | `tar xzf minv-linux-x64.tar.gz` |
 | Windows 10 and 11 | [`minv-win32-x64-setup.exe`](https://github.com/tyrannyme/minv/releases/latest/download/minv-win32-x64-setup.exe) | Run it. It installs for your user, no admin needed |
 | Windows, portable | [`minv-win32-x64.zip`](https://github.com/tyrannyme/minv/releases/latest/download/minv-win32-x64.zip) | Extract it and run `Minv.exe` |
 
-The packages and the Windows installer put `minv` on your `PATH` and Minv in your app launcher or Start menu; from the Linux archive, run `minv-linux-x64/bin/minv`. Check a download with `sha256sum -c --ignore-missing SHA256SUMS` from the same release.
+The .deb, the .rpm and the Windows installer add Minv to your app launcher or Start menu and a `minv` command to your terminal, so `minv .` opens the current folder (on Windows, open a new terminal after installing). The AppImage, the archive and the zip don't add a command; link one yourself:
 
 ```sh
+ln -s ~/Applications/minv-linux-x64.AppImage ~/.local/bin/minv   # AppImage
+ln -s "$PWD/minv-linux-x64/bin/minv" ~/.local/bin/minv          # archive
 minv /path/to/workspace
 ```
+
+Check a download with `sha256sum -c --ignore-missing SHA256SUMS` from the same release.
 
 Linux and Windows on x64, and you need Git installed. Minv keeps its settings in `~/.config/Minv` and `~/.minv` (`%APPDATA%\Minv` and `%USERPROFILE%\.minv` on Windows), separate from VS Code's. Builds are unsigned, so Windows SmartScreen asks before the first run, and they don't update themselves: install a newer package to update.
 
@@ -69,7 +74,7 @@ Minv's changes to Code-OSS live in [`fork/`](fork). [`scripts/fork-prepare.mjs`]
 
 VS Code's chat and MCP services stay registered, though nothing uses them, because Tasks and the terminal depend on them. `chat.disableAIFeatures` is on, and every AI view, extension and the Agents window are removed.
 
-Pushing a tag `v<version>` that matches `package.json` builds, smoke-tests and publishes a release. CI compiles native modules against upstream's glibc 2.28 sysroot, so the Linux packages run wherever VS Code does. Before publishing, it installs the .deb on Ubuntu, the .rpm on Fedora, and the Windows installer on Windows, then opens the app. `npm run package -- tar rpm` builds only some formats; the .deb needs `dpkg-deb` and the .rpm needs `rpmbuild`. On Windows, build with `npm run gulp vscode-win32-x64-min` in `.upstream/build`, then `npm run package` makes the installer and zip.
+Pushing a tag `v<version>` that matches `package.json` builds, smoke-tests and publishes a release. CI compiles native modules against upstream's glibc 2.28 sysroot, so the Linux packages run wherever VS Code does. Before publishing, it installs the .deb on Ubuntu, the .rpm on Fedora, and the Windows installer on Windows, and opens the app from the archive, the .deb, the AppImage and the Windows install. `npm run package -- tar rpm` builds only some formats; the .deb needs `dpkg-deb`, the .rpm `rpmbuild`, and the AppImage `appimagetool` (or `APPIMAGETOOL=/path/to/it`). On Windows, build with `npm run gulp vscode-win32-x64-min` in `.upstream/build`, then `npm run package` makes the installer and zip.
 
 ## License
 

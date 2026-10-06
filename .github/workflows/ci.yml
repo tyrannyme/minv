@@ -82,8 +82,26 @@ jobs:
           grep -q '^Workbench painted' build/smoke.log
           grep -q 'eval:.*main' build/smoke.log
 
+      - name: Install appimagetool
+        run: |
+          curl -fsSL -o /tmp/appimagetool https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-x86_64.AppImage
+          echo "ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0  /tmp/appimagetool" | sha256sum -c
+          chmod +x /tmp/appimagetool
+
       - name: Package
+        env:
+          APPIMAGETOOL: /tmp/appimagetool
+          # The runner has no FUSE; run AppImages (appimagetool and Minv's) by extracting them.
+          APPIMAGE_EXTRACT_AND_RUN: 1
         run: node scripts/fork-package.mjs
+
+      - name: Smoke test the AppImage
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: 1
+        run: |
+          node scripts/fork-capture.mjs /tmp/smoke build/smoke-appimage.png --app=build/release/minv-linux-x64.AppImage --wait=5000 \
+            --eval="document.querySelector('.statusbar')?.innerText" | tee build/smoke-appimage.log
+          grep -q 'eval:.*main' build/smoke-appimage.log
 
       - name: Check glibc floor
         run: |
@@ -215,6 +233,7 @@ jobs:
           | --- | --- | --- |
           | Debian, Ubuntu | `minv-linux-x64.deb` | `sudo apt install ./minv-linux-x64.deb` |
           | Fedora, RHEL, openSUSE | `minv-linux-x64.rpm` | `sudo dnf install ./minv-linux-x64.rpm` |
+          | Any distribution | `minv-linux-x64.AppImage` | `chmod +x minv-linux-x64.AppImage && ./minv-linux-x64.AppImage` |
           | Any distribution | `minv-linux-x64.tar.gz` | `tar xzf minv-linux-x64.tar.gz && minv-linux-x64/bin/minv` |
           | Windows 10 and 11 | `minv-win32-x64-setup.exe` | Run it; installs for your user, no admin needed |
           | Windows, portable | `minv-win32-x64.zip` | Extract and run `Minv.exe` |
