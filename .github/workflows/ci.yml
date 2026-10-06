@@ -20,14 +20,15 @@ defaults:
   run:
     shell: bash
 
+env:
+  # Sysroot, toolchain and prebuilt downloads (ripgrep and others) go through the GitHub API.
+  GITHUB_TOKEN: ${{ github.token }}
+
 jobs:
   build:
     name: Build, smoke test and package (Linux x64)
     runs-on: ubuntu-24.04
     timeout-minutes: 90
-    env:
-      # The sysroot and toolchain downloads go through the GitHub API.
-      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v5
 
@@ -106,7 +107,7 @@ jobs:
       - name: Check glibc floor
         run: |
           # Fails if anything shipped needs a newer glibc than the 2.28 sysroot provides.
-          floor=$(find .upstream/VSCode-linux-x64 -type f \( -name '*.node' -o -name minv \) -exec objdump -T {} + 2>/dev/null \
+          floor=$( { find .upstream/VSCode-linux-x64 -name '*.node'; echo .upstream/VSCode-linux-x64/minv; } | xargs objdump -T \
             | grep -o 'GLIBC_[0-9.]*' | sort -uV | tail -1)
           echo "Highest glibc symbol: ${floor}"
           [ "$(printf '%s\n' "${floor#GLIBC_}" 2.28 | sort -V | tail -1)" = 2.28 ]
