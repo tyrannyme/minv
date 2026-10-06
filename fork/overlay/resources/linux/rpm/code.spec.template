@@ -1,0 +1,63 @@
+Name:     @@NAME@@
+Version:  @@VERSION@@
+Release:  1
+Summary:  VS Code, cut down to what you open it for
+Group:    Development/Tools
+License:  @@LICENSE@@
+URL:      https://minv.tyranny.me
+Requires: @@DEPENDENCIES@@
+Recommends: git
+AutoReq:  0
+
+%global __provides_exclude_from ^%{_datadir}/%{name}/.*\\.so.*$
+# Electron's binaries must not be stripped, see https://github.com/microsoft/vscode/issues/223455
+%global __brp_strip %{nil}
+%global __brp_strip_comment_note %{nil}
+%define _build_id_links none
+%define __strip @@STRIP@@
+# The gulp task stages files in BUILD; newer rpmbuild runs %install in a per-package subdirectory of it.
+%global staged %{_topdir}/BUILD
+
+%description
+Minv is Code-OSS with everything but reading, Markdown, changes, commits and branches taken out: the Explorer, search, the editor, the terminal and Source Control with Git. No telemetry, no extensions marketplace.
+
+%install
+mkdir -p %{buildroot}%{_bindir}
+mkdir -p %{buildroot}%{_datadir}/%{name}
+mkdir -p %{buildroot}%{_datadir}/applications
+mkdir -p %{buildroot}%{_datadir}/appdata
+mkdir -p %{buildroot}%{_datadir}/mime/packages
+mkdir -p %{buildroot}%{_datadir}/pixmaps
+mkdir -p %{buildroot}%{_datadir}/bash-completion/completions
+mkdir -p %{buildroot}%{_datadir}/zsh/site-functions
+cp -r %{staged}/usr/share/%{name}/* %{buildroot}%{_datadir}/%{name}
+ln -s %{_datadir}/%{name}/bin/%{name} %{buildroot}%{_bindir}/%{name}
+cp %{staged}/usr/share/applications/%{name}.desktop %{buildroot}%{_datadir}/applications
+cp %{staged}/usr/share/applications/%{name}-url-handler.desktop %{buildroot}%{_datadir}/applications
+cp %{staged}/usr/share/appdata/%{name}.appdata.xml %{buildroot}%{_datadir}/appdata
+cp %{staged}/usr/share/mime/packages/%{name}-workspace.xml %{buildroot}%{_datadir}/mime/packages/%{name}-workspace.xml
+cp %{staged}/usr/share/pixmaps/@@ICON@@.png %{buildroot}%{_datadir}/pixmaps
+cp %{staged}/usr/share/bash-completion/completions/%{name} %{buildroot}%{_datadir}/bash-completion/completions/%{name}
+cp %{staged}/usr/share/zsh/site-functions/_%{name} %{buildroot}%{_datadir}/zsh/site-functions/_%{name}
+
+%post
+update-desktop-database &> /dev/null || :
+update-mime-database %{_datadir}/mime &> /dev/null || :
+
+%postun
+update-desktop-database &> /dev/null || :
+update-mime-database %{_datadir}/mime &> /dev/null || :
+
+%files
+%defattr(-,root,root)
+%attr(4755, root, root) %{_datadir}/%{name}/chrome-sandbox
+
+%{_bindir}/%{name}
+%{_datadir}/%{name}/
+%{_datadir}/applications/%{name}.desktop
+%{_datadir}/applications/%{name}-url-handler.desktop
+%{_datadir}/appdata/%{name}.appdata.xml
+%{_datadir}/mime/packages/%{name}-workspace.xml
+%{_datadir}/pixmaps/@@ICON@@.png
+%{_datadir}/bash-completion/completions/%{name}
+%{_datadir}/zsh/site-functions/_%{name}

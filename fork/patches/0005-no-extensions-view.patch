@@ -1,8 +1,37 @@
 diff --git a/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts b/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
-index b06c588b..8b5f1a33 100644
+index b06c588b..1c063760 100644
 --- a/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
 +++ b/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
-@@ -127,6 +127,7 @@ export const VIEW_CONTAINER = Registry.as<IViewContainersRegistry>(ViewContainer
+@@ -7,7 +7,6 @@ import { IAction } from '../../../../base/common/actions.js';
+ import { CancellationToken } from '../../../../base/common/cancellation.js';
+ import { onUnexpectedError } from '../../../../base/common/errors.js';
+ import { Event } from '../../../../base/common/event.js';
+-import { KeyCode, KeyMod } from '../../../../base/common/keyCodes.js';
+ import { mnemonicButtonLabel } from '../../../../base/common/labels.js';
+ import { Disposable, DisposableStore, IDisposable, isDisposable } from '../../../../base/common/lifecycle.js';
+ import { Schemas } from '../../../../base/common/network.js';
+@@ -47,7 +46,7 @@ import { IUriIdentityService } from '../../../../platform/uriIdentity/common/uri
+ import { IUserDataProfilesService } from '../../../../platform/userDataProfile/common/userDataProfile.js';
+ import { EditorPaneDescriptor, IEditorPaneRegistry } from '../../../browser/editor.js';
+ import { Extensions as ConfigurationMigrationExtensions, IConfigurationMigrationRegistry } from '../../../common/configuration.js';
+-import { IsSessionsWindowContext, ResourceContextKey, WorkbenchStateContext } from '../../../common/contextkeys.js';
++import { ResourceContextKey, WorkbenchStateContext } from '../../../common/contextkeys.js';
+ import { IWorkbenchContribution, IWorkbenchContributionsRegistry, registerWorkbenchContribution2, Extensions as WorkbenchExtensions, WorkbenchPhase } from '../../../common/contributions.js';
+ import { EditorExtensions } from '../../../common/editor.js';
+ import { IViewContainersRegistry, Extensions as ViewContainerExtensions, ViewContainerLocation } from '../../../common/views.js';
+@@ -116,10 +115,8 @@ export const VIEW_CONTAINER = Registry.as<IViewContainersRegistry>(ViewContainer
+ 	{
+ 		id: VIEWLET_ID,
+ 		title: localize2('extensions', "Extensions"),
+-		openCommandActionDescriptor: {
++		openCommandActionDescriptor: { // Minv: no View menu entry or keybinding
+ 			id: VIEWLET_ID,
+-			mnemonicTitle: localize({ key: 'miViewExtensions', comment: ['&& denotes a mnemonic'] }, "E&&xtensions"),
+-			keybindings: { primary: KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KeyX },
+ 			order: 4,
+ 		},
+ 		ctorDescriptor: new SyncDescriptor(ExtensionsViewPaneContainer),
+@@ -127,6 +124,7 @@ export const VIEW_CONTAINER = Registry.as<IViewContainersRegistry>(ViewContainer
  		order: 4,
  		rejectAddedViews: true,
  		alwaysUseContainerInfo: true,
@@ -10,3 +39,29 @@ index b06c588b..8b5f1a33 100644
  	}, ViewContainerLocation.Sidebar);
  
  Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Configuration)
+@@ -698,24 +696,7 @@ class ExtensionsContributions extends Disposable implements IWorkbenchContributi
+ 
+ 	// Global actions
+ 	private registerGlobalActions(): void {
+-		this._register(MenuRegistry.appendMenuItem(MenuId.MenubarPreferencesMenu, {
+-			command: {
+-				id: VIEWLET_ID,
+-				title: localize({ key: 'miPreferencesExtensions', comment: ['&& denotes a mnemonic'] }, "&&Extensions")
+-			},
+-			group: '2_configuration',
+-			order: 3,
+-			when: IsSessionsWindowContext.negate()
+-		}));
+-		this._register(MenuRegistry.appendMenuItem(MenuId.GlobalActivity, {
+-			command: {
+-				id: VIEWLET_ID,
+-				title: localize('showExtensions', "Extensions")
+-			},
+-			group: '2_configuration',
+-			order: 3
+-		}));
+-
++		// Minv: no Extensions entries in File > Preferences or the Manage menu.
+ 		this.registerExtensionAction({
+ 			id: 'workbench.extensions.action.focusExtensionsView',
+ 			title: localize2('focusExtensions', 'Focus on Extensions View'),

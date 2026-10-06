@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 // Launches the Code-OSS fork from .upstream/build in a private Xvfb display with a throwaway profile,
 // waits, and captures the window through the DevTools protocol. Nothing opens on the real desktop.
+// On Windows (CI) there is no Xvfb, so the app opens directly.
 // Usage: node scripts/fork-capture.mjs <workspace> [out.png] [--app=packaged/minv] [--open=file] [--keys=ctrl+k,v]
 //   [--click=row;row] [--type=text] [--scale=2] [--settings=json] [--wait=ms] [--eval=js] [--exceptions] [--log] [--debug]
 import { spawn, spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -22,16 +23,18 @@ const profile = mkdtempSync(join(root, '.minv-dev', 'fork-profile-'));
 mkdirSync(join(profile, 'data/User'), { recursive: true });
 writeFileSync(join(profile, 'data/User/settings.json'), option('settings') ?? '{}');
 const port = 9300 + Math.floor(Math.random() * 600);
-const xvfb = spawnSync('which', ['xvfb-run'], { encoding: 'utf8' }).stdout.trim();
-if (!xvfb) throw new Error('xvfb-run is required.');
-const env = { ...process.env, VSCODE_SKIP_PRELAUNCH: '1' };
+const linux = process.platform === 'linux';
+if (linux && spawnSync('xvfb-run', ['--help'], { stdio: 'ignore' }).error) throw new Error('xvfb-run is required.');
+// TMPDIR keeps xvfb-run's temp dir inside the profile, which is removed at the end even if xvfb-run is killed first.
+const env = { ...process.env, VSCODE_SKIP_PRELAUNCH: '1', TMPDIR: profile };
 for (const name of ['ELECTRON_RUN_AS_NODE', 'WAYLAND_DISPLAY']) delete env[name];
 const started = Date.now();
 const opened = option('open') ? [resolve(workspace, option('open'))] : [];
-const child = spawn(xvfb, ['-a', `--server-args=-screen 0 ${Math.ceil(1600 * Number(option('scale') ?? 1))}x${Math.ceil(1000 * Number(option('scale') ?? 1))}x24`, option('app') ? resolve(option('app')) : join(source, 'scripts/code.sh'), workspace, ...opened,
+const xvfb = linux ? ['xvfb-run', '-a', `--server-args=-screen 0 ${Math.ceil(1600 * Number(option('scale') ?? 1))}x${Math.ceil(1000 * Number(option('scale') ?? 1))}x24`] : [];
+const [command, ...args] = [...xvfb, option('app') ? resolve(option('app')) : join(source, 'scripts/code.sh'), workspace, ...opened,
   '--user-data-dir', join(profile, 'data'), '--extensions-dir', join(profile, 'extensions'), `--remote-debugging-port=${port}`,
-  ...(process.env.MINV_FORK_ARGS ? process.env.MINV_FORK_ARGS.split(' ') : []), '--disable-workspace-trust', '--skip-welcome', '--skip-release-notes', '--ozone-platform=x11', `--force-device-scale-factor=${option('scale') ?? 1}`],
-  { cwd: source, env, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
+  ...(process.env.MINV_FORK_ARGS ? process.env.MINV_FORK_ARGS.split(' ') : []), '--disable-workspace-trust', '--skip-welcome', '--skip-release-notes', ...(linux ? ['--ozone-platform=x11'] : []), `--force-device-scale-factor=${option('scale') ?? 1}`];
+const child = spawn(command, args, { cwd: source, env, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
 let log = '';
 child.stdout.on('data', d => { log += d; }); child.stderr.on('data', d => { log += d; });
 
@@ -51,6 +54,8 @@ try {
   const socket = new WebSocket(await page());
   await new Promise((done, fail) => { socket.onopen = done; socket.onerror = fail; });
   let id = 0; const pending = new Map();
+  // If the renderer dies, fail every pending request instead of waiting forever.
+  socket.onclose = () => { for (const [, settle] of pending) settle({ error: 'DevTools connection closed' }); pending.clear(); };
   const problems = [];
   const caught = [];
   const urls = new Map();
@@ -67,12 +72,18 @@ try {
     }
     pending.get(message.id)?.(message); pending.delete(message.id);
   };
-  const send = (method, params = {}) => new Promise(done => { const n = ++id; pending.set(n, done); socket.send(JSON.stringify({ id: n, method, params })); });
+  const send = (method, params = {}) => new Promise((done, fail) => {
+    const n = ++id;
+    const timer = setTimeout(() => { pending.delete(n); fail(new Error(`${method} timed out\n${log.slice(-3000)}`)); }, 30000);
+    pending.set(n, message => { clearTimeout(timer); if (message.error) fail(new Error(`${method}: ${message.error.message ?? message.error}`)); else done(message); });
+    socket.send(JSON.stringify({ id: n, method, params }));
+  });
   const evaluate = async expression => (await send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true })).result?.result?.value;
   await send('Runtime.enable');
   if (process.argv.includes('--debug')) { await send('Page.reload', { ignoreCache: true }); await delay(1000); }
-  for (let i = 0; i < 300 && !(await evaluate(`!!document.querySelector('.monaco-workbench .part.sidebar')`)); i++) await delay(100);
-  console.log(`Workbench painted after ${Date.now() - started} ms`);
+  let painted = false;
+  for (let i = 0; i < 300 && !(painted = await evaluate(`!!document.querySelector('.monaco-workbench .part.sidebar')`)); i++) await delay(100);
+  console.log(painted ? `Workbench painted after ${Date.now() - started} ms` : `Workbench did not paint within ${Date.now() - started} ms`);
   await delay(wait);
   // --exceptions records every exception thrown (even caught ones) while the keys are pressed.
   if (process.argv.includes('--exceptions')) { await send('Network.enable'); await send('Debugger.enable'); await send('Debugger.setPauseOnExceptions', { state: 'all' }); }
@@ -116,11 +127,17 @@ try {
   console.error(error.message);
   process.exitCode = 1;
 } finally {
-  try { process.kill(-child.pid, 'SIGTERM'); } catch { /* Already gone. */ }
-  await delay(500);
-  try { process.kill(-child.pid, 'SIGKILL'); } catch { /* Already gone. */ }
+  if (linux) {
+    try { process.kill(-child.pid, 'SIGTERM'); } catch { /* Already gone. */ }
+    await delay(500);
+    try { process.kill(-child.pid, 'SIGKILL'); } catch { /* Already gone. */ }
+  } else {
+    spawnSync('taskkill', ['/pid', String(child.pid), '/t', '/f'], { stdio: 'ignore' });
+    await delay(1000);
+  }
   // Surface the workbench's own error log, which is where missing services and failed contributions land.
-  const logs = spawnSync('sh', ['-c', `grep -rhE "\\[error\\]" ${JSON.stringify(join(profile, 'data/logs'))} 2>/dev/null | sort | uniq -c | sort -rn | head -40`], { encoding: 'utf8' }).stdout;
+  const logs = spawnSync('sh', ['-c', `grep -rhE "\\[error\\]" ${JSON.stringify(join(profile, 'data/logs'))} 2>/dev/null | sort | uniq -c | sort -rn | head -40`], { encoding: 'utf8' }).stdout ?? '';
+  rmSync(profile, { recursive: true, force: true });
   if (logs.trim()) console.log(`Workbench errors:\n${logs}`);
   if (process.argv.includes('--log')) console.log(`App output:\n${log.slice(-6000)}`);
 }

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=@@NAME_LONG@@ - URL Handler
+Comment=Read, review and commit
+GenericName=Text Editor
+Exec=@@EXEC@@ --open-url %U
+Icon=@@ICON@@
+Type=Application
+NoDisplay=true
+StartupNotify=true
+Categories=Utility;TextEditor;Development;
+MimeType=x-scheme-handler/@@URLPROTOCOL@@;

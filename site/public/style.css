@@ -114,14 +114,16 @@ kbd { display: inline-grid; place-items: center; min-width: 24px; height: 24px; 
 
 /* Install */
 .install .section-head { margin-left: auto; margin-right: auto; text-align: center; }
+.install .terminal { margin-top: 32px; }
 .terminal { max-width: 860px; margin: 0 auto; border: 1px solid var(--border); border-radius: 10px; background: #07080a; overflow: hidden; }
 .terminal .bar { display: flex; align-items: center; gap: 7px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
 .terminal .bar span { width: 11px; height: 11px; border-radius: 50%; background: var(--border); }
-.terminal .copy { margin-left: auto; height: 28px; padding: 0 12px; border: 1px solid var(--border); border-radius: 5px; background: var(--raised); color: var(--fg2); font: 500 13px var(--ui); cursor: pointer; }
-.terminal .copy:hover { color: var(--fg); }
 .terminal pre { margin: 0; padding: 22px 24px; overflow-x: auto; font-size: 15px; line-height: 1.9; }
 .terminal code { background: none; border: 0; padding: 0; font-size: inherit; color: var(--fg); }
 .terminal .p { color: var(--lime); user-select: none; }
+.terminal .c { color: var(--fg3); user-select: none; }
+:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.compare:has(input:focus-visible) .handle::after { outline: 2px solid var(--fg); outline-offset: 3px; }
 
 footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; margin-top: 140px; padding: 32px max(20px, calc((100% - var(--wide)) / 2));
   border-top: 1px solid var(--line); font-size: 14px; color: var(--fg2); }

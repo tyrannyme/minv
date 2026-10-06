@@ -20,16 +20,7 @@ function select(tab) {
 const compare = document.querySelector('.compare');
 compare?.querySelector('input').addEventListener('input', event => compare.style.setProperty('--split', `${event.target.value}%`));
 
-// Copy the install commands without the prompts.
-document.querySelector('.terminal .copy')?.addEventListener('click', async event => {
-  const text = document.querySelector('[data-install]').innerText.replace(/^\$ /gm, '');
-  await navigator.clipboard.writeText(text);
-  event.target.textContent = 'Copied';
-  setTimeout(() => { event.target.textContent = 'Copy'; }, 1600);
-});
-
-// Linux visitors get the archive directly; everyone else is told it's Linux-only for now.
-const linux = /Linux/.test(navigator.userAgent) && !/Android/.test(navigator.userAgent);
-const archive = document.querySelector('[data-download-direct]').href;
-for (const link of document.querySelectorAll('[data-download]')) if (linux) link.href = archive;
-if (!linux) document.querySelector('[data-platform-note]').innerHTML = 'Linux x64 only for now. <a href="https://github.com/tyrannyme/minv">Watch the repo</a> for macOS and Windows.';
+// Mac visitors are told there's no macOS build yet.
+if (/Mac/.test(navigator.platform)) {
+  document.querySelector('[data-platform-note]').innerHTML = 'Linux and Windows only for now. <a href="https://github.com/tyrannyme/minv">Watch the repo</a> for macOS.';
+}

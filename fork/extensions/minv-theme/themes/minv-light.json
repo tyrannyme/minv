@@ -168,8 +168,8 @@
 		"diffEditor.border": "#e8eaef",
 		"diffEditorGutter.insertedLineBackground": "#e3f5ea",
 		"diffEditorGutter.removedLineBackground": "#fde8e8",
-		"scm.historyItemAdditionsForeground": "#0d7643",
-		"scm.historyItemDeletionsForeground": "#c22b2b",
+		"scmGraph.historyItemHoverAdditionsForeground": "#0d7643",
+		"scmGraph.historyItemHoverDeletionsForeground": "#c22b2b",
 		"peekView.border": "#dcdfe6",
 		"peekViewEditor.background": "#ffffff",
 		"peekViewResult.background": "#eceef2",
@@ -179,8 +179,7 @@
 		"keybindingLabel.border": "#dcdfe6",
 		"keybindingLabel.bottomBorder": "#dcdfe6",
 		"keybindingLabel.foreground": "#4a505c",
-		"welcomePage.background": "#ffffff",
-		"editorWatermark.foreground": "#63697766"
+		"welcomePage.background": "#ffffff"
 	},
 	"tokenColors": [
 		{

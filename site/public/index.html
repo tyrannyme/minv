@@ -4,15 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Minv: VS Code, minus everything you never open</title>
-  <meta name="description" content="Minv is VS Code cut down to reading files, reviewing changes, committing and checking submodule branches. No debugger, no AI, no telemetry. Free and open source for Linux.">
+  <meta name="description" content="Minv is VS Code cut down to reading files, reviewing changes, committing and checking submodule branches. No debugger, no AI, no telemetry. Free and open source for Linux and Windows.">
   <meta name="theme-color" content="#0a0b0d">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <meta property="og:type" content="website">
+  <link rel="canonical" href="https://minv.tyranny.me/">
+  <meta property="og:site_name" content="Minv">
   <meta property="og:url" content="https://minv.tyranny.me/">
   <meta property="og:title" content="Minv: VS Code, minus everything you never open">
-  <meta property="og:description" content="Read a file, review the changes, commit, check a submodule's branch. Nothing else. Free and open source for Linux.">
+  <meta property="og:description" content="Read a file, review the changes, commit, check a submodule's branch. Nothing else. Free and open source for Linux and Windows.">
   <meta property="og:image" content="https://minv.tyranny.me/img/og.png">
+  <meta property="og:image:alt" content="Minv's Source Control view with submodule branches and a side-by-side diff">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preload" href="/fonts/instrument-sans-latin-standard-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/style.css">
@@ -26,25 +29,25 @@
       <a href="#install">Install</a>
       <a href="https://github.com/tyrannyme/minv">GitHub</a>
     </nav>
-    <a class="button small" href="#install" data-download>Download</a>
+    <a class="button small" href="#install">Download</a>
   </header>
 
   <main>
     <section class="hero">
-      <p class="kicker"><span class="dot"></span><span data-version>v0.1.0</span> · Linux x64 · free and open source</p>
+      <p class="kicker"><span class="dot"></span>v1.0.0 · Linux and Windows · free and open source</p>
       <h1>VS Code, minus everything you <em>never open</em>.</h1>
       <p class="lead">Your agents write the code. You still need to read a file, review the changes, commit, and check which branch a submodule is on. Minv is VS Code cut down to exactly that, so it opens fast and stays quiet.</p>
       <div class="ctas">
-        <a class="button" href="#install" data-download>
+        <a class="button" href="#install">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Download for Linux
+          Download
         </a>
         <a class="button ghost" href="https://github.com/tyrannyme/minv">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.1-1.46-1.1-1.46-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>
           View the source
         </a>
       </div>
-      <p class="fineprint" data-platform-note>One 168 MB download. Needs Linux x64 and Git.</p>
+      <p class="fineprint" data-platform-note>Linux and Windows on x64. Needs Git.</p>
 
       <figure class="shot hero-shot">
         <div class="frame">
@@ -68,9 +71,9 @@
       </div>
       <div class="tabs" role="tablist" aria-label="What Minv is for">
         <button role="tab" aria-selected="true" aria-controls="panel-changes" id="tab-changes">Review changes</button>
-        <button role="tab" aria-selected="false" aria-controls="panel-branches" id="tab-branches">Check branches</button>
-        <button role="tab" aria-selected="false" aria-controls="panel-readme" id="tab-readme">Preview a README</button>
-        <button role="tab" aria-selected="false" aria-controls="panel-files" id="tab-files">Read a file</button>
+        <button role="tab" aria-selected="false" aria-controls="panel-branches" id="tab-branches" tabindex="-1">Check branches</button>
+        <button role="tab" aria-selected="false" aria-controls="panel-readme" id="tab-readme" tabindex="-1">Preview a README</button>
+        <button role="tab" aria-selected="false" aria-controls="panel-files" id="tab-files" tabindex="-1">Read a file</button>
       </div>
       <div class="panels">
         <article class="panel" role="tabpanel" id="panel-changes" aria-labelledby="tab-changes">
@@ -153,25 +156,30 @@
   extensions-remove.json <i>built-in extensions that aren't shipped</i>
   product.json           <i>name, data folders, quiet defaults</i>
   extensions/minv-theme  <i>Minv Dark and Minv Light</i>
-  patches/               <i>eight small, commented patches</i></code></pre>
+  patches/               <i>ten small, commented patches</i></code></pre>
     </section>
 
     <section class="install" id="install">
       <div class="section-head">
         <p class="label">Install</p>
-        <h2>Three commands. Nothing to sign into.</h2>
-      </div>
-      <div class="terminal">
-        <div class="bar"><span></span><span></span><span></span><button class="copy" type="button">Copy</button></div>
-        <pre><code data-install><span class="p">$</span> curl -LO https://github.com/tyrannyme/minv/releases/download/v0.1.0/minv-0.1.0-linux-x64.tar.gz
-<span class="p">$</span> tar xzf minv-0.1.0-linux-x64.tar.gz
-<span class="p">$</span> ./minv-0.1.0-linux-x64/bin/minv ~/your/workspace</code></pre>
+        <h2>One package. Nothing to sign into.</h2>
       </div>
       <div class="ctas center">
-        <a class="button" data-download-direct href="https://github.com/tyrannyme/minv/releases/download/v0.1.0/minv-0.1.0-linux-x64.tar.gz">Download minv-0.1.0-linux-x64.tar.gz</a>
-        <a class="button ghost" href="https://github.com/tyrannyme/minv/releases">All releases and checksums</a>
+        <a class="button" href="https://github.com/tyrannyme/minv/releases/latest/download/minv-linux-x64.deb">Debian, Ubuntu (.deb)</a>
+        <a class="button" href="https://github.com/tyrannyme/minv/releases/latest/download/minv-linux-x64.rpm">Fedora, RHEL (.rpm)</a>
+        <a class="button" href="https://github.com/tyrannyme/minv/releases/latest/download/minv-win32-x64-setup.exe">Windows (installer)</a>
+        <a class="button ghost" href="https://github.com/tyrannyme/minv/releases/latest/download/minv-linux-x64.AppImage">Any distro (AppImage)</a>
       </div>
-      <p class="fineprint center">Linux x64 with Git installed. Settings live in <code>~/.config/Minv</code>, apart from VS Code's. Unsigned development build.</p>
+      <div class="terminal">
+        <div class="bar"><span></span><span></span><span></span></div>
+        <pre><code><span class="c"># Debian, Ubuntu</span>
+<span class="p">$</span> sudo apt install ./minv-linux-x64.deb
+<span class="c"># Fedora, RHEL, openSUSE</span>
+<span class="p">$</span> sudo dnf install ./minv-linux-x64.rpm
+<span class="c"># Windows: run minv-win32-x64-setup.exe. Then open any folder</span>
+<span class="p">$</span> minv ~/your/workspace</code></pre>
+      </div>
+      <p class="fineprint center">x64 with Git installed. Settings live apart from VS Code's. Unsigned, so Windows asks before the first run, with no auto-update: install a newer package to update. <a href="https://github.com/tyrannyme/minv/releases">All releases and checksums</a></p>
     </section>
   </main>
 

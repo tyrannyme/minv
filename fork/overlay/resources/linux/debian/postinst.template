@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# Symlink the command into /usr/bin.
+rm -f /usr/bin/@@NAME@@
+ln -s /usr/share/@@NAME@@/bin/@@NAME@@ /usr/bin/@@NAME@@
+
+if hash update-desktop-database 2>/dev/null; then
+	update-desktop-database
+fi
+if hash update-mime-database 2>/dev/null; then
+	update-mime-database /usr/share/mime
+fi

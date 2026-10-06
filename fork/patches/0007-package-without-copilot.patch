@@ -5,8 +5,9 @@ index ac122c37..b9c9efa7 100644
 @@ -184,7 +184,7 @@ task.task(bundleVSCodeTask);
  const sourceMappingURLBase = `https://main.vscode-cdn.net/sourcemaps/${commit}`;
  const isCI = !!process.env['CI'] || !!process.env['BUILD_ARTIFACTSTAGINGDIRECTORY'] || !!process.env['GITHUB_WORKSPACE'];
- const useCdnSourceMapsForPackagingTasks = isCI;
+-const useCdnSourceMapsForPackagingTasks = isCI;
 -const stripSourceMapsInPackagingTasks = isCI;
++const useCdnSourceMapsForPackagingTasks = false; // Minv: no links to Microsoft's source map CDN
 +const stripSourceMapsInPackagingTasks = true; // Minv: never ship source maps
  const minifyVSCodeTask = task.define('minify-vscode', task.series(
  	bundleVSCodeTask,

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+	<id>@@NAME@@.desktop</id>
+	<metadata_license>@@LICENSE@@</metadata_license>
+	<project_license>@@LICENSE@@</project_license>
+	<name>@@NAME_LONG@@</name>
+	<summary>VS Code, cut down to what you open it for</summary>
+	<description>
+		<p>@@NAME_LONG@@ is Code-OSS with everything but reading, Markdown, changes, commits and branches taken out: the Explorer, search, the editor, the terminal and Source Control with Git. It opens fast and stays quiet, with no telemetry.</p>
+	</description>
+	<url type="homepage">https://minv.tyranny.me</url>
+	<url type="bugtracker">https://github.com/tyrannyme/minv/issues</url>
+	<launchable type="desktop-id">@@NAME@@.desktop</launchable>
+	<screenshots>
+		<screenshot type="default">
+			<image>https://raw.githubusercontent.com/tyrannyme/minv/main/docs/readme-assets/minv.png</image>
+		</screenshot>
+	</screenshots>
+</component>
