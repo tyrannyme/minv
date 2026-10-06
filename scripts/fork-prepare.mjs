@@ -21,6 +21,10 @@ if (!existsSync(join(build, '.git'))) {
   git(build, 'init', '--quiet');
   git(build, 'remote', 'add', 'origin', pin.repository);
 }
+// LF everywhere, Windows included: strip.json lines and patches are LF, and upstream's .gitattributes would otherwise
+// check out CRLF there.
+git(build, 'config', 'core.autocrlf', 'false');
+git(build, 'config', 'core.eol', 'lf');
 try { git(build, 'cat-file', '-e', `${pin.commit}^{commit}`); } catch { git(build, 'fetch', '--quiet', '--depth=1', 'origin', pin.commit); }
 git(build, 'checkout', '--quiet', '--detach', '--force', pin.commit);
 git(build, 'clean', '-fdq');
