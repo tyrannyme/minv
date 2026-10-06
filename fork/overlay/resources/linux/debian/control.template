@@ -1,0 +1,14 @@
+Package: @@NAME@@
+Version: @@VERSION@@
+Section: devel
+Depends: @@DEPENDS@@
+Recommends: git, libvulkan1
+Priority: optional
+Architecture: @@ARCHITECTURE@@
+Maintainer: Tyranny <291189604+tyrannyme@users.noreply.github.com>
+Homepage: https://minv.tyranny.me
+Installed-Size: @@INSTALLEDSIZE@@
+Description: VS Code, cut down to what you open it for
+ Minv is Code-OSS with everything but reading, Markdown, changes, commits
+ and branches taken out: the Explorer, search, the editor, the terminal and
+ Source Control with Git. No telemetry, no extensions marketplace.

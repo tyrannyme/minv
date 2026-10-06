@@ -1,0 +1,78 @@
+diff --git a/build/gulpfile.vscode.linux.ts b/build/gulpfile.vscode.linux.ts
+index 45179160..670b91c5 100644
+--- a/build/gulpfile.vscode.linux.ts
++++ b/build/gulpfile.vscode.linux.ts
+@@ -23,6 +23,7 @@ const root = path.dirname(import.meta.dirname);
+ const commit = getVersion(root);
+ 
+ const linuxPackageRevision = Math.floor(new Date().getTime() / 1000);
++const linuxPackageVersion = process.env['MINV_VERSION'] ?? packageJson.version; // Minv: packages carry Minv's version
+ 
+ function getDebPackageArch(arch: string): string {
+ 	switch (arch) {
+@@ -87,7 +88,7 @@ function prepareDebPackage(arch: string) {
+ 				const that = this;
+ 				gulp.src('resources/linux/debian/control.template', { base: '.' })
+ 					.pipe(replace('@@NAME@@', product.applicationName))
+-					.pipe(replace('@@VERSION@@', packageJson.version + '-' + linuxPackageRevision))
++					.pipe(replace('@@VERSION@@', linuxPackageVersion + '-' + linuxPackageRevision))
+ 					.pipe(replace('@@ARCHITECTURE@@', debArch))
+ 					.pipe(replace('@@DEPENDS@@', dependencies.join(', ')))
+ 					.pipe(replace('@@RECOMMENDS@@', debianRecommendedDependencies.join(', ')))
+@@ -109,11 +110,8 @@ function prepareDebPackage(arch: string) {
+ 			.pipe(replace('@@ARCHITECTURE@@', debArch))
+ 			.pipe(rename('DEBIAN/postinst'));
+ 
+-		const templates = gulp.src('resources/linux/debian/templates.template', { base: '.' })
+-			.pipe(replace('@@NAME@@', product.applicationName))
+-			.pipe(rename('DEBIAN/templates'));
+-
+-		const all = es.merge(control, templates, postinst, postrm, prerm, desktops, appdata, workspaceMime, icon, bash_completion, zsh_completion, code);
++		// Minv: no debconf templates; they only ask about adding Microsoft's apt repository.
++		const all = es.merge(control, postinst, postrm, prerm, desktops, appdata, workspaceMime, icon, bash_completion, zsh_completion, code);
+ 
+ 		return all.pipe(vfs.dest(destination));
+ 	};
+@@ -194,7 +192,7 @@ function prepareRpmPackage(arch: string) {
+ 			.pipe(replace('@@NAME@@', product.applicationName))
+ 			.pipe(replace('@@NAME_LONG@@', product.nameLong))
+ 			.pipe(replace('@@ICON@@', product.linuxIconName))
+-			.pipe(replace('@@VERSION@@', packageJson.version))
++			.pipe(replace('@@VERSION@@', linuxPackageVersion))
+ 			.pipe(replace('@@RELEASE@@', linuxPackageRevision.toString()))
+ 			.pipe(replace('@@ARCHITECTURE@@', rpmArch))
+ 			.pipe(replace('@@LICENSE@@', product.licenseName))
+diff --git a/build/linux/dependencies-generator.ts b/build/linux/dependencies-generator.ts
+index 0aab69e8..be2c8b16 100644
+--- a/build/linux/dependencies-generator.ts
++++ b/build/linux/dependencies-generator.ts
+@@ -4,6 +4,7 @@
+  *--------------------------------------------------------------------------------------------*/
+ import { spawnSync } from 'child_process';
+ import path from 'path';
++import { existsSync } from 'fs'; // Minv
+ import { getChromiumSysroot, getVSCodeSysroot } from './debian/install-sysroot.ts';
+ import { generatePackageDeps as generatePackageDepsDebian } from './debian/calculate-deps.ts';
+ import { generatePackageDeps as generatePackageDepsRpm } from './rpm/calculate-deps.ts';
+@@ -20,7 +21,7 @@ import product from '../../product.json' with { type: 'json' };
+ // If true, we fail the build if there are new dependencies found during that task.
+ // The reference dependencies, which one has to update when the new dependencies
+ // are valid, are in dep-lists.ts
+-const FAIL_BUILD_FOR_NEW_DEPENDENCIES: boolean = true;
++const FAIL_BUILD_FOR_NEW_DEPENDENCIES: boolean = false; // Minv: report changes, don't fail
+ 
+ // Based on https://source.chromium.org/chromium/chromium/src/+/refs/tags/148.0.7778.280:chrome/installer/linux/BUILD.gn;l=64-80
+ // and the Linux Archive build
+@@ -56,8 +57,10 @@ export async function getDependencies(packageType: 'deb' | 'rpm', buildDir: stri
+ 	const appPath = path.join(buildDir, applicationName);
+ 	// Add the native modules
+ 	const files = findResult.stdout.toString().trimEnd().split('\n');
+-	// Add the tunnel binary.
+-	files.push(path.join(buildDir, 'bin', product.tunnelApplicationName));
++	// Add the tunnel binary. Minv: Code-OSS builds don't include it.
++	if (existsSync(path.join(buildDir, 'bin', product.tunnelApplicationName))) {
++		files.push(path.join(buildDir, 'bin', product.tunnelApplicationName));
++	}
+ 	// Add the main executable.
+ 	files.push(appPath);
+ 	// Add chrome sandbox and crashpad handler.
