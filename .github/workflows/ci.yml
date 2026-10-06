@@ -62,6 +62,7 @@ jobs:
           VSCODE_ARCH: x64
           npm_config_arch: x64
         run: |
+          npm ci --prefix build --no-audit --no-fund
           source build/azure-pipelines/linux/setup-env.sh
           node build/npm/preinstall.ts
           npm ci --no-audit --no-fund
@@ -121,18 +122,83 @@ jobs:
           path: build/release/*
           if-no-files-found: error
 
+  windows:
+    name: Build, package and install test (Windows x64)
+    runs-on: windows-2025
+    timeout-minutes: 120
+    steps:
+      # Upstream's patches and sources must stay LF for the fork's patches to apply.
+      - run: git config --global core.autocrlf false
+
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+
+      - name: Prepare the fork
+        run: node scripts/fork-prepare.mjs
+
+      - name: Install upstream dependencies
+        working-directory: .upstream/build
+        env:
+          npm_config_arch: x64
+        run: npm ci --no-audit --no-fund
+
+      - name: Build
+        working-directory: .upstream/build
+        env:
+          BUILD_SOURCEVERSION: ${{ github.sha }}
+        run: npm run gulp vscode-win32-x64-min
+
+      - name: Package
+        run: node scripts/fork-package.mjs
+
+      - name: Install and smoke test the installer
+        shell: pwsh
+        run: |
+          Start-Process -Wait -FilePath build\release\minv-win32-x64-setup.exe -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/MERGETASKS=!runcode'
+          $app = "$env:LOCALAPPDATA\Programs\Minv\Minv.exe"
+          if (-not (Test-Path $app)) { throw "Minv.exe was not installed" }
+          git init -q -b main "$env:RUNNER_TEMP\smoke"
+          git -C "$env:RUNNER_TEMP\smoke" -c user.name=ci -c user.email=ci@minv.invalid commit -q --allow-empty -m init
+          node scripts/fork-capture.mjs "$env:RUNNER_TEMP\smoke" build\smoke-win.png "--app=$app" --wait=8000 `
+            "--eval=document.querySelector('.statusbar')?.innerText" | Tee-Object build\smoke-win.log
+          if (-not (Select-String -Quiet -Path build\smoke-win.log -Pattern '^Workbench painted')) { throw "The workbench did not paint" }
+          if (-not (Select-String -Quiet -Path build\smoke-win.log -Pattern 'eval:.*main')) { throw "Git status did not show in the status bar" }
+
+      - name: Upload smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-win
+          path: build/smoke-win*
+          if-no-files-found: ignore
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: minv-win32-x64
+          path: build/release/*
+          if-no-files-found: error
+
   release:
     name: Publish release
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: build
+    needs: [build, windows]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: minv-linux-x64
+          pattern: minv-*
           path: release
+          merge-multiple: true
+
+      - name: Checksums
+        working-directory: release
+        run: sha256sum * > SHA256SUMS && cat SHA256SUMS
 
       - name: Create GitHub release
         env:
@@ -150,8 +216,10 @@ jobs:
           | Debian, Ubuntu | `minv-linux-x64.deb` | `sudo apt install ./minv-linux-x64.deb` |
           | Fedora, RHEL, openSUSE | `minv-linux-x64.rpm` | `sudo dnf install ./minv-linux-x64.rpm` |
           | Any distribution | `minv-linux-x64.tar.gz` | `tar xzf minv-linux-x64.tar.gz && minv-linux-x64/bin/minv` |
+          | Windows 10 and 11 | `minv-win32-x64-setup.exe` | Run it; installs for your user, no admin needed |
+          | Windows, portable | `minv-win32-x64.zip` | Extract and run `Minv.exe` |
 
-          Check a download with `sha256sum -c --ignore-missing SHA256SUMS`. You need Git installed.
+          Check a download with `sha256sum -c --ignore-missing SHA256SUMS`. You need Git installed. The Windows builds are unsigned, so SmartScreen asks before the first run: choose More info, then Run anyway.
           EOF
           gh release create "$GITHUB_REF_NAME" release/* \
             --title "Minv $version" --notes-file notes.md --generate-notes --verify-tag $prerelease

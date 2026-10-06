@@ -1,0 +1,61 @@
+diff --git a/build/gulpfile.vscode.win32.ts b/build/gulpfile.vscode.win32.ts
+index 1f0f2d9e..58ea5ece 100644
+--- a/build/gulpfile.vscode.win32.ts
++++ b/build/gulpfile.vscode.win32.ts
+@@ -85,8 +85,8 @@ function buildWin32Setup(arch: string, target: string): task.CallbackTask {
+ 			NameLong: product.nameLong,
+ 			NameShort: product.nameShort,
+ 			DirName: product.win32DirName,
+-			Version: pkg.version,
+-			RawVersion: pkg.version.replace(/-\w+$/, ''),
++			Version: process.env['MINV_VERSION'] ?? pkg.version, // Minv: the installer carries Minv's version
++			RawVersion: (process.env['MINV_VERSION'] ?? pkg.version).replace(/-\w+$/, ''),
+ 			Commit: commit,
+ 			NameVersion: product.win32NameVersion + (target === 'user' ? ' (User)' : ''),
+ 			ExeBasename: product.nameShort,
+diff --git a/build/win32/code.iss b/build/win32/code.iss
+index 5b430614..7e7463ab 100644
+--- a/build/win32/code.iss
++++ b/build/win32/code.iss
+@@ -8,10 +8,10 @@
+ AppId={#AppId}
+ AppName={#NameLong}
+ AppVerName={#NameVersion}
+-AppPublisher=Microsoft Corporation
+-AppPublisherURL=https://code.visualstudio.com/
+-AppSupportURL=https://code.visualstudio.com/
+-AppUpdatesURL=https://code.visualstudio.com/
++AppPublisher=Minv
++AppPublisherURL=https://minv.tyranny.me/
++AppSupportURL=https://github.com/tyrannyme/minv/issues
++AppUpdatesURL=https://github.com/tyrannyme/minv/releases
+ DefaultGroupName={#NameLong}
+ AllowNoIcons=yes
+ OutputDir={#OutputDir}
+@@ -1382,7 +1382,7 @@ begin
+ 
+   #if "user" == InstallTarget
+     if not WizardSilent() and IsAdmin() then begin
+-      if MsgBox('This User Installer is not meant to be run as an Administrator. If you would like to install VS Code for all users in this system, download the System Installer instead from https://code.visualstudio.com. Are you sure you want to continue?', mbError, MB_OKCANCEL) = IDCANCEL then begin
++      if MsgBox('This User Installer is not meant to be run as an Administrator. Minv installs for the current user only. Are you sure you want to continue?', mbError, MB_OKCANCEL) = IDCANCEL then begin
+         Result := False;
+       end;
+     end;
+diff --git a/build/gulpfile.vscode.ts b/build/gulpfile.vscode.ts
+index bfdc530..a4d3cd4 100644
+--- a/build/gulpfile.vscode.ts
++++ b/build/gulpfile.vscode.ts
+@@ -659,11 +659,11 @@ function patchWin32DependenciesTask(destinationFolderName: string) {
+ 			await rcedit(fullPath, {
+ 				'file-version': baseVersion,
+ 				'version-string': {
+-					'CompanyName': 'Microsoft Corporation',
++					'CompanyName': product.nameLong, // Minv
+ 					'FileDescription': product.nameLong,
+ 					'FileVersion': packageJson.version,
+ 					'InternalName': basename,
+-					'LegalCopyright': 'Copyright (C) 2026 Microsoft. All rights reserved',
++					'LegalCopyright': 'MIT License. Built from Code-OSS, Copyright (C) Microsoft Corporation', // Minv
+ 					'OriginalFilename': basename,
+ 					'ProductName': product.nameLong,
+ 					'ProductVersion': packageJson.version,

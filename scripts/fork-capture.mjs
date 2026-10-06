@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Launches the Code-OSS fork from .upstream/build in a private Xvfb display with a throwaway profile,
 // waits, and captures the window through the DevTools protocol. Nothing opens on the real desktop.
+// On Windows (CI) there is no Xvfb, so the app opens directly.
 // Usage: node scripts/fork-capture.mjs <workspace> [out.png] [--app=packaged/minv] [--open=file] [--keys=ctrl+k,v]
 //   [--click=row;row] [--type=text] [--scale=2] [--settings=json] [--wait=ms] [--eval=js] [--exceptions] [--log] [--debug]
 import { spawn, spawnSync } from 'node:child_process';
@@ -22,16 +23,18 @@ const profile = mkdtempSync(join(root, '.minv-dev', 'fork-profile-'));
 mkdirSync(join(profile, 'data/User'), { recursive: true });
 writeFileSync(join(profile, 'data/User/settings.json'), option('settings') ?? '{}');
 const port = 9300 + Math.floor(Math.random() * 600);
-if (spawnSync('xvfb-run', ['--help'], { stdio: 'ignore' }).error) throw new Error('xvfb-run is required.');
+const linux = process.platform === 'linux';
+if (linux && spawnSync('xvfb-run', ['--help'], { stdio: 'ignore' }).error) throw new Error('xvfb-run is required.');
 // TMPDIR keeps xvfb-run's temp dir inside the profile, which is removed at the end even if xvfb-run is killed first.
 const env = { ...process.env, VSCODE_SKIP_PRELAUNCH: '1', TMPDIR: profile };
 for (const name of ['ELECTRON_RUN_AS_NODE', 'WAYLAND_DISPLAY']) delete env[name];
 const started = Date.now();
 const opened = option('open') ? [resolve(workspace, option('open'))] : [];
-const child = spawn('xvfb-run', ['-a', `--server-args=-screen 0 ${Math.ceil(1600 * Number(option('scale') ?? 1))}x${Math.ceil(1000 * Number(option('scale') ?? 1))}x24`, option('app') ? resolve(option('app')) : join(source, 'scripts/code.sh'), workspace, ...opened,
+const xvfb = linux ? ['xvfb-run', '-a', `--server-args=-screen 0 ${Math.ceil(1600 * Number(option('scale') ?? 1))}x${Math.ceil(1000 * Number(option('scale') ?? 1))}x24`] : [];
+const [command, ...args] = [...xvfb, option('app') ? resolve(option('app')) : join(source, 'scripts/code.sh'), workspace, ...opened,
   '--user-data-dir', join(profile, 'data'), '--extensions-dir', join(profile, 'extensions'), `--remote-debugging-port=${port}`,
-  ...(process.env.MINV_FORK_ARGS ? process.env.MINV_FORK_ARGS.split(' ') : []), '--disable-workspace-trust', '--skip-welcome', '--skip-release-notes', '--ozone-platform=x11', `--force-device-scale-factor=${option('scale') ?? 1}`],
-  { cwd: source, env, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
+  ...(process.env.MINV_FORK_ARGS ? process.env.MINV_FORK_ARGS.split(' ') : []), '--disable-workspace-trust', '--skip-welcome', '--skip-release-notes', ...(linux ? ['--ozone-platform=x11'] : []), `--force-device-scale-factor=${option('scale') ?? 1}`];
+const child = spawn(command, args, { cwd: source, env, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
 let log = '';
 child.stdout.on('data', d => { log += d; }); child.stderr.on('data', d => { log += d; });
 
@@ -124,12 +127,17 @@ try {
   console.error(error.message);
   process.exitCode = 1;
 } finally {
-  try { process.kill(-child.pid, 'SIGTERM'); } catch { /* Already gone. */ }
-  await delay(500);
-  try { process.kill(-child.pid, 'SIGKILL'); } catch { /* Already gone. */ }
+  if (linux) {
+    try { process.kill(-child.pid, 'SIGTERM'); } catch { /* Already gone. */ }
+    await delay(500);
+    try { process.kill(-child.pid, 'SIGKILL'); } catch { /* Already gone. */ }
+  } else {
+    spawnSync('taskkill', ['/pid', String(child.pid), '/t', '/f'], { stdio: 'ignore' });
+    await delay(1000);
+  }
   // Surface the workbench's own error log, which is where missing services and failed contributions land.
-  const logs = spawnSync('sh', ['-c', `grep -rhE "\\[error\\]" ${JSON.stringify(join(profile, 'data/logs'))} 2>/dev/null | sort | uniq -c | sort -rn | head -40`], { encoding: 'utf8' }).stdout;
+  const logs = spawnSync('sh', ['-c', `grep -rhE "\\[error\\]" ${JSON.stringify(join(profile, 'data/logs'))} 2>/dev/null | sort | uniq -c | sort -rn | head -40`], { encoding: 'utf8' }).stdout ?? '';
+  rmSync(profile, { recursive: true, force: true });
   if (logs.trim()) console.log(`Workbench errors:\n${logs}`);
   if (process.argv.includes('--log')) console.log(`App output:\n${log.slice(-6000)}`);
-  rmSync(profile, { recursive: true, force: true });
 }

@@ -20,7 +20,7 @@ function select(tab) {
 const compare = document.querySelector('.compare');
 compare?.querySelector('input').addEventListener('input', event => compare.style.setProperty('--split', `${event.target.value}%`));
 
-// Everyone who isn't on Linux is told it's Linux-only for now.
-if (!/Linux/.test(navigator.userAgent) || /Android/.test(navigator.userAgent)) {
-  document.querySelector('[data-platform-note]').innerHTML = 'Linux x64 only for now. <a href="https://github.com/tyrannyme/minv">Watch the repo</a> for macOS and Windows.';
+// Mac visitors are told there's no macOS build yet.
+if (/Mac/.test(navigator.platform)) {
+  document.querySelector('[data-platform-note]').innerHTML = 'Linux and Windows only for now. <a href="https://github.com/tyrannyme/minv">Watch the repo</a> for macOS.';
 }

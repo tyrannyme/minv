@@ -1,5 +1,5 @@
 {
-  "$comment": "Merged over upstream product.json by scripts/fork-prepare.mjs. Keys set to null are removed. defaultChatAgent stays: the account service requires it, and its extensions are not shipped.",
+  "$comment": "Merged over upstream product.json by scripts/fork-prepare.mjs. Keys set to null are removed. The win32 AppIds are Minv's own, so its installers never touch a Code-OSS install. defaultChatAgent stays: the account service requires it, and its extensions are not shipped.",
   "nameShort": "Minv",
   "nameLong": "Minv",
   "applicationName": "minv",
@@ -13,6 +13,10 @@
   "win32NameVersion": "Minv",
   "win32RegValueName": "Minv",
   "win32AppUserModelId": "Minv.Minv",
+  "win32x64AppId": "{{F85C820E-76B7-4716-9D6A-1A115298D60C}",
+  "win32arm64AppId": "{{82F6FE8D-1CAD-45F6-9412-5A7040B6F656}",
+  "win32x64UserAppId": "{{D8CEF332-BFB4-4FA7-A13C-1A2E98FFDEE7}",
+  "win32arm64UserAppId": "{{BBF5F49C-5622-4AD7-8A39-34619118E955}",
   "win32ShellNameShort": "M&inv",
   "win32TunnelServiceMutex": "minv-tunnelservice",
   "win32TunnelMutex": "minv-tunnel",
