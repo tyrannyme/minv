@@ -26,7 +26,14 @@
   "licenseUrl": "https://github.com/tyrannyme/minv/blob/main/LICENSE",
   "serverLicenseUrl": "https://github.com/tyrannyme/minv/blob/main/LICENSE",
   "reportIssueUrl": "https://github.com/tyrannyme/minv/issues/new",
-  "builtInExtensions": [],
+  "builtInExtensions": [
+    {
+      "name": "PKief.material-icon-theme",
+      "version": "5.39.0",
+      "sha256": "f3fda4e1d6095d942c92467c1ad6f322a74c62160f7d29741058e4d726922fbd",
+      "repo": "https://github.com/material-extensions/vscode-material-icon-theme"
+    }
+  ],
   "builtInExtensionsEnabledWithAutoUpdates": [],
   "onboardingKeymaps": null,
   "onboardingThemes": null,
@@ -37,6 +44,7 @@
     "workbench.colorTheme": "Minv Dark",
     "workbench.preferredDarkColorTheme": "Minv Dark",
     "workbench.preferredLightColorTheme": "Minv Light",
+    "workbench.iconTheme": "material-icon-theme",
     "workbench.startupEditor": "none",
     "workbench.tips.enabled": false,
     "workbench.layoutControl.enabled": false,
