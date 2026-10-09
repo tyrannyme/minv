@@ -13,7 +13,7 @@
 
 When your agents do the work, you still open an editor now and then: to read a file, look at the changes, commit, check which branch a submodule is on, or read and edit a README. Minv is VS Code with everything else taken out, so it opens fast and stays quiet.
 
-**What's in it:** the Explorer, Quick Open, search, the editor, the integrated terminal, and Source Control with VS Code's own Git (staging, commits, branches, push and pull, the graph). It also renders Markdown previews. Every submodule's branch shows in the Repositories list, and Minv opens up to 256 submodules where VS Code stops at 10.
+**What's in it:** the Explorer, Quick Open, search, the editor, the integrated terminal, and Source Control with VS Code's own Git (staging, commits, branches, push and pull, the graph). It also renders Markdown previews, and shows file icons from Philipp Kief's [Material Icon Theme](https://github.com/material-extensions/vscode-material-icon-theme). Every submodule's branch shows in the Repositories list, and Minv opens up to 256 submodules where VS Code stops at 10.
 
 **What's taken out:** debugging, testing, AI chat, agents and the Agents window, inline completions, the integrated browser, accounts and settings sync, remote development, the extension marketplace, notebooks, language servers, welcome pages and surveys. There's no telemetry.
 
