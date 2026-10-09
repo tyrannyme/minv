@@ -1,0 +1,29 @@
+diff --git a/src/vs/workbench/contrib/scm/browser/scmRepositoriesViewPane.ts b/src/vs/workbench/contrib/scm/browser/scmRepositoriesViewPane.ts
+index 1523a82c..53c7ab93 100644
+--- a/src/vs/workbench/contrib/scm/browser/scmRepositoriesViewPane.ts
++++ b/src/vs/workbench/contrib/scm/browser/scmRepositoriesViewPane.ts
+@@ -32,7 +32,7 @@ import { Sequencer, Throttler } from '../../../../base/common/async.js';
+ import { SCMArtifactGroupTreeElement, SCMArtifactTreeElement } from '../common/artifact.js';
+ import { FuzzyScore } from '../../../../base/common/fuzzyScorer.js';
+ import { IconLabel } from '../../../../base/browser/ui/iconLabel/iconLabel.js';
+-import { SCMViewService } from './scmViewService.js';
++import { RepositoryContextKeys, SCMViewService } from './scmViewService.js';
+ import { ThemeIcon } from '../../../../base/common/themables.js';
+ import { WorkbenchToolBar } from '../../../../platform/actions/browser/toolbar.js';
+ import { ITelemetryService } from '../../../../platform/telemetry/common/telemetry.js';
+@@ -511,6 +511,15 @@ export class SCMRepositoriesViewPane extends ViewPane {
+ 					}
+ 				}));
+ 
++				// Minv: the sort actions reorder the view service's repositories but nothing re-reads them,
++				// so the list keeps its old order until a repository is added or removed.
++				const sortKeys = new Set([RepositoryContextKeys.RepositorySortKey.key]);
++				this.visibilityDisposables.add(this.contextKeyService.onDidChangeContext(e => {
++					if (e.affectsSome(sortKeys)) {
++						this.updateChildren();
++					}
++				}));
++
+ 				// Update tree selection
+ 				const onDidChangeVisibleRepositoriesSignal = observableSignalFromEvent(
+ 					this, this.scmViewService.onDidChangeVisibleRepositories);
