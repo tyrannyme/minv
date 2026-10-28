@@ -1,0 +1,24 @@
+{
+	"name": "theme-one-dark-pro",
+	"displayName": "One Dark Pro",
+	"description": "Binaryify's One Dark Pro color theme, as published in OneDark-Pro 3.20.4.",
+	"version": "3.20.4",
+	"publisher": "minv",
+	"license": "MIT",
+	"engines": {
+		"vscode": "*"
+	},
+	"categories": [
+		"Themes"
+	],
+	"contributes": {
+		"themes": [
+			{
+				"id": "One Dark Pro",
+				"label": "One Dark Pro",
+				"uiTheme": "vs-dark",
+				"path": "./themes/OneDark-Pro.json"
+			}
+		]
+	}
+}

@@ -1,0 +1,49 @@
+{
+	"name": "toml",
+	"displayName": "TOML Language Basics",
+	"description": "TOML syntax highlighting, from Taplo's VS Code extension (tamasfe/taplo@08f343b).",
+	"version": "1.0.0",
+	"publisher": "minv",
+	"license": "MIT",
+	"engines": {
+		"vscode": "*"
+	},
+	"categories": [
+		"Programming Languages"
+	],
+	"contributes": {
+		"languages": [
+			{
+				"id": "toml",
+				"aliases": [
+					"TOML"
+				],
+				"extensions": [
+					".toml"
+				],
+				"filenames": [
+					"Cargo.lock",
+					"uv.lock"
+				],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "toml",
+				"scopeName": "source.toml",
+				"path": "./syntaxes/toml.tmLanguage.json"
+			},
+			{
+				"scopeName": "markdown.toml.codeblock",
+				"path": "./syntaxes/toml.markdown.tmLanguage.json",
+				"injectTo": [
+					"text.html.markdown"
+				],
+				"embeddedLanguages": {
+					"meta.embedded.block.toml": "toml"
+				}
+			}
+		]
+	}
+}
