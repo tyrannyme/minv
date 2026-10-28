@@ -13,7 +13,7 @@
 
 When your agents do the work, you still open an editor now and then: to read a file, look at the changes, commit, check which branch a submodule is on, or read and edit a README. Minv is VS Code with everything else taken out, so it opens fast and stays quiet.
 
-**What's in it:** the Explorer, Quick Open, search, the editor, the integrated terminal, and Source Control with VS Code's own Git (staging, commits, branches, push and pull, the graph). It also renders Markdown previews, and shows file icons from Philipp Kief's [Material Icon Theme](https://github.com/material-extensions/vscode-material-icon-theme). Every submodule's branch shows in the Repositories list, and Minv opens up to 256 submodules where VS Code stops at 10.
+**What's in it:** the Explorer, Quick Open, search, the editor, the integrated terminal, and Source Control with VS Code's own Git (staging, commits, branches, push and pull, the graph). It also renders Markdown previews, highlights TOML with [Taplo](https://github.com/tamasfe/taplo)'s grammar, ships Binaryify's [One Dark Pro](https://github.com/Binaryify/OneDark-Pro) theme beside Minv's own, and shows file icons from Philipp Kief's [Material Icon Theme](https://github.com/material-extensions/vscode-material-icon-theme). Every submodule's branch shows in the Repositories list, and Minv opens up to 256 submodules where VS Code stops at 10.
 
 **What's taken out:** debugging, testing, AI chat, agents and the Agents window, inline completions, the integrated browser, accounts and settings sync, remote development, the extension marketplace, notebooks, language servers, welcome pages and surveys. There's no telemetry.
 
@@ -69,6 +69,8 @@ Minv's changes to Code-OSS live in [`fork/`](fork). [`scripts/fork-prepare.mjs`]
 | [`fork/extensions-remove.json`](fork/extensions-remove.json) | Built-in extensions that aren't shipped |
 | [`fork/product.json`](fork/product.json) | Name, data folders, and default settings |
 | [`fork/extensions/minv-theme`](fork/extensions/minv-theme) | Minv Dark and Minv Light |
+| [`fork/extensions/theme-one-dark-pro`](fork/extensions/theme-one-dark-pro) | One Dark Pro, as published in OneDark-Pro 3.20.4 |
+| [`fork/extensions/toml`](fork/extensions/toml) | TOML highlighting, in files and Markdown code blocks |
 | [`fork/overlay`](fork/overlay) | Icons, the bundled Instrument Sans and Commit Mono fonts, and the .deb and .rpm package templates |
 | [`fork/patches`](fork/patches) | Small source and build patches, each one commented |
 
