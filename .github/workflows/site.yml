@@ -1,0 +1,44 @@
+name: Site
+
+# Deploys minv.tyranny.me. The page's version, Code-OSS base and patch count come from the latest published release,
+# so it runs after every release (called from CI) and whenever the site itself changes.
+on:
+  push:
+    branches: [main]
+    paths: ['site/**', '.github/workflows/site.yml']
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy minv.tyranny.me
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - name: Stamp the latest release into the page
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          tag=$(gh release view --json tagName --jq .tagName)
+          code_oss=$(gh api "repos/${GH_REPO}/contents/fork/upstream.json?ref=${tag}" --jq .content | base64 -d | jq -r .tag)
+          patches=$(gh api "repos/${GH_REPO}/contents/fork/patches?ref=${tag}" --jq '[.[] | select(.name | endswith(".patch"))] | length')
+          node site/stamp-release.mjs "$tag" "$code_oss" "$patches"
+
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: 4.95.0
+          workingDirectory: site
+          command: deploy

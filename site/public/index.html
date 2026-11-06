@@ -34,7 +34,7 @@
 
   <main>
     <section class="hero">
-      <p class="kicker"><span class="dot"></span>v1.3.0 · Linux and Windows · free and open source</p>
+      <p class="kicker"><span class="dot"></span><span data-release="version">v1.3.0</span> · Linux and Windows · free and open source</p>
       <h1>VS Code, minus everything you <em>never open</em>.</h1>
       <p class="lead">Your agents write the code. You still need to read a file, review the changes, commit, and check which branch a submodule is on. Minv is VS Code cut down to exactly that, so it opens fast and stays quiet.</p>
       <div class="ctas">
@@ -151,12 +151,12 @@
         <p class="sub">No long-lived fork drifting away from upstream. Every build starts from Microsoft's MIT-licensed Code-OSS source at a pinned commit and applies the same changes, in CI, from scratch.</p>
       </div>
       <pre class="tree"><code><b>fork/</b>
-  upstream.json          <i>Code-OSS 1.145.2, pinned to one commit</i>
+  upstream.json          <i>Code-OSS <span data-release="code-oss">1.145.2</span>, pinned to one commit</i>
   strip.json             <i>features that are never registered</i>
   extensions-remove.json <i>built-in extensions that aren't shipped</i>
   product.json           <i>name, data folders, quiet defaults</i>
   extensions/            <i>Minv's themes, One Dark Pro, TOML</i>
-  patches/               <i>ten small, commented patches</i></code></pre>
+  patches/               <i><span data-release="patches">eleven</span> small, commented patches</i></code></pre>
     </section>
 
     <section class="install" id="install">

@@ -243,3 +243,9 @@ jobs:
           EOF
           gh release create "$GITHUB_REF_NAME" release/* \
             --title "Minv $version" --notes-file notes.md --generate-notes --verify-tag $prerelease
+
+  site:
+    name: Update minv.tyranny.me
+    needs: release
+    uses: ./.github/workflows/site.yml
+    secrets: inherit

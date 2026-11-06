@@ -56,7 +56,7 @@ npm run package    # build/release: minv-linux-x64.tar.gz, .deb and .rpm
 
 `npm run capture -- <workspace> out.png --app=.upstream/VSCode-linux-x64/minv` opens the app in a private Xvfb display and screenshots it, so nothing appears on your desktop. It can also click rows, press keys and type (`--click`, `--keys`, `--type`).
 
-The landing page lives in [`site/`](site). Deploy it with `cd site && wrangler deploy`.
+The landing page lives in [`site/`](site). CI deploys it after every release and whenever `site/` changes on main, and fills in the version, Code-OSS base and patch count from the latest release ([`site/stamp-release.mjs`](site/stamp-release.mjs)), so releases don't touch it. `cd site && wrangler deploy` deploys it by hand.
 
 ## How the fork works
 
