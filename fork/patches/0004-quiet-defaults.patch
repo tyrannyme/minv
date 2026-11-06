@@ -1,8 +1,8 @@
 diff --git a/src/vs/workbench/browser/parts/globalCompositeBar.ts b/src/vs/workbench/browser/parts/globalCompositeBar.ts
-index 6aec4cf9..e7e1a4a7 100644
+index d0f5bd1b..0c9e93a0 100644
 --- a/src/vs/workbench/browser/parts/globalCompositeBar.ts
 +++ b/src/vs/workbench/browser/parts/globalCompositeBar.ts
-@@ -840,7 +840,7 @@ function simpleActivityContextMenuActions(storageService: IStorageService, isAcc
+@@ -860,7 +860,7 @@ function simpleActivityContextMenuActions(storageService: IStorageService, isAcc
  }
  
  export function isAccountsActionVisible(storageService: IStorageService): boolean {
@@ -12,7 +12,7 @@ index 6aec4cf9..e7e1a4a7 100644
  
  function setAccountsActionVisible(storageService: IStorageService, visible: boolean) {
 diff --git a/src/vs/workbench/contrib/scm/browser/scm.contribution.ts b/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
-index 6ee2a32c..bab4b736 100644
+index 22920b5f..9d9cf6ab 100644
 --- a/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
 +++ b/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
 @@ -94,7 +94,7 @@ viewsRegistry.registerViews([{

@@ -49,6 +49,7 @@
     "workbench.tips.enabled": false,
     "workbench.layoutControl.enabled": false,
     "workbench.secondarySideBar.defaultVisibility": "hidden",
+    "workbench.experimental.modernUI": false,
     "chat.disableAIFeatures": true,
     "editor.fontFamily": "'Commit Mono', 'Adwaita Mono', monospace",
     "editor.fontSize": 13,

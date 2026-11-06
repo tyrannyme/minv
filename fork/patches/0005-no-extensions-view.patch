@@ -1,5 +1,5 @@
 diff --git a/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts b/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
-index b06c588b..1c063760 100644
+index ddc9d000..1881209e 100644
 --- a/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
 +++ b/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
 @@ -7,7 +7,6 @@ import { IAction } from '../../../../base/common/actions.js';
@@ -19,7 +19,7 @@ index b06c588b..1c063760 100644
  import { IWorkbenchContribution, IWorkbenchContributionsRegistry, registerWorkbenchContribution2, Extensions as WorkbenchExtensions, WorkbenchPhase } from '../../../common/contributions.js';
  import { EditorExtensions } from '../../../common/editor.js';
  import { IViewContainersRegistry, Extensions as ViewContainerExtensions, ViewContainerLocation } from '../../../common/views.js';
-@@ -116,10 +115,8 @@ export const VIEW_CONTAINER = Registry.as<IViewContainersRegistry>(ViewContainer
+@@ -115,10 +114,8 @@ export const VIEW_CONTAINER = Registry.as<IViewContainersRegistry>(ViewContainer
  	{
  		id: VIEWLET_ID,
  		title: localize2('extensions', "Extensions"),
@@ -31,7 +31,7 @@ index b06c588b..1c063760 100644
  			order: 4,
  		},
  		ctorDescriptor: new SyncDescriptor(ExtensionsViewPaneContainer),
-@@ -127,6 +124,7 @@ export const VIEW_CONTAINER = Registry.as<IViewContainersRegistry>(ViewContainer
+@@ -126,6 +123,7 @@ export const VIEW_CONTAINER = Registry.as<IViewContainersRegistry>(ViewContainer
  		order: 4,
  		rejectAddedViews: true,
  		alwaysUseContainerInfo: true,
@@ -39,7 +39,7 @@ index b06c588b..1c063760 100644
  	}, ViewContainerLocation.Sidebar);
  
  Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Configuration)
-@@ -698,24 +696,7 @@ class ExtensionsContributions extends Disposable implements IWorkbenchContributi
+@@ -679,24 +677,7 @@ class ExtensionsContributions extends Disposable implements IWorkbenchContributi
  
  	// Global actions
  	private registerGlobalActions(): void {

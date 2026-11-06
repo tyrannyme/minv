@@ -1,5 +1,5 @@
 {
   "repository": "https://github.com/microsoft/vscode.git",
-  "tag": "1.137.0",
-  "commit": "645f29cc3176500b4b5762ba887cf2a7f0ffdf2c"
+  "tag": "1.145.2",
+  "commit": "c4453f8ea430795f941c1b2ff6c9321135a74a02"
 }

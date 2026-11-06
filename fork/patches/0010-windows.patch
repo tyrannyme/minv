@@ -1,5 +1,48 @@
+diff --git a/build/gulpfile.vscode.ts b/build/gulpfile.vscode.ts
+index dd29d868..2395cbc0 100644
+--- a/build/gulpfile.vscode.ts
++++ b/build/gulpfile.vscode.ts
+@@ -426,6 +426,7 @@ function packageTask(platform: string, arch: string, sourceFolderName: string, d
+ 				.pipe(rename(product.nameShort + '.VisualElementsManifest.xml')));
+ 
+ 			// Setup publishes it next to the copilot.exe shim; see build/win32/copilot.iss.
++			if (fs.existsSync(path.join(root, 'extensions', 'copilot'))) { // Minv: no Copilot shim without Copilot
+ 			result = es.merge(result, gulp.src('resources/win32/bin/copilot.sh', { base: 'resources/win32' })
+ 				.pipe(es.through(function (file) {
+ 					file.contents = Buffer.from(renderCopilotShimLauncher(file.contents.toString('utf8'), {
+@@ -438,6 +439,7 @@ function packageTask(platform: string, arch: string, sourceFolderName: string, d
+ 					this.emit('data', file);
+ 				}))
+ 				.pipe(rename(f => { f.dirname = 'bin/copilot-shim'; f.basename = 'copilot'; f.extname = ''; })));
++			}
+ 
+ 			result = es.merge(result, gulp.src('.build/policies/win32/**', { base: '.build/policies/win32' })
+ 				.pipe(rename(f => f.dirname = `policies/${f.dirname}`)));
+@@ -480,7 +482,7 @@ function packageTask(platform: string, arch: string, sourceFolderName: string, d
+ function hasAuthenticodeSignature(filePath: string): Promise<boolean> {
+ 	return new Promise((resolve, reject) => {
+ 		const proc = cp.spawn('signtool.exe', ['verify', '/pa', filePath]);
+-		proc.on('error', reject);
++		proc.on('error', () => resolve(false)); // Minv: unsigned builds, signtool may not be on PATH
+ 		proc.on('exit', code => resolve(code === 0));
+ 	});
+ }
+@@ -534,11 +536,11 @@ function patchWin32DependenciesTask(destinationFolderName: string) {
+ 			await rcedit(fullPath, {
+ 				'file-version': baseVersion,
+ 				'version-string': {
+-					'CompanyName': 'Microsoft Corporation',
++					'CompanyName': product.nameLong, // Minv
+ 					'FileDescription': product.nameLong,
+ 					'FileVersion': packageJson.version,
+ 					'InternalName': basename,
+-					'LegalCopyright': 'Copyright (C) 2026 Microsoft. All rights reserved',
++					'LegalCopyright': 'MIT License. Built from Code-OSS, Copyright (C) Microsoft Corporation', // Minv
+ 					'OriginalFilename': basename,
+ 					'ProductName': product.nameLong,
+ 					'ProductVersion': packageJson.version,
 diff --git a/build/gulpfile.vscode.win32.ts b/build/gulpfile.vscode.win32.ts
-index 1f0f2d9e..58ea5ece 100644
+index 0722b7f4..fe439a9b 100644
 --- a/build/gulpfile.vscode.win32.ts
 +++ b/build/gulpfile.vscode.win32.ts
 @@ -85,8 +85,8 @@ function buildWin32Setup(arch: string, target: string): task.CallbackTask {
@@ -14,7 +57,7 @@ index 1f0f2d9e..58ea5ece 100644
  			NameVersion: product.win32NameVersion + (target === 'user' ? ' (User)' : ''),
  			ExeBasename: product.nameShort,
 diff --git a/build/win32/code.iss b/build/win32/code.iss
-index 5b430614..7e7463ab 100644
+index a5e3597b..560fa43e 100644
 --- a/build/win32/code.iss
 +++ b/build/win32/code.iss
 @@ -8,10 +8,10 @@
@@ -32,7 +75,7 @@ index 5b430614..7e7463ab 100644
  DefaultGroupName={#NameLong}
  AllowNoIcons=yes
  OutputDir={#OutputDir}
-@@ -1382,7 +1382,7 @@ begin
+@@ -1390,7 +1390,7 @@ begin
  
    #if "user" == InstallTarget
      if not WizardSilent() and IsAdmin() then begin
@@ -41,30 +84,3 @@ index 5b430614..7e7463ab 100644
          Result := False;
        end;
      end;
-diff --git a/build/gulpfile.vscode.ts b/build/gulpfile.vscode.ts
-index bfdc530..03f96dd 100644
---- a/build/gulpfile.vscode.ts
-+++ b/build/gulpfile.vscode.ts
-@@ -605,7 +605,7 @@ function packageTask(platform: string, arch: string, sourceFolderName: string, d
- function hasAuthenticodeSignature(filePath: string): Promise<boolean> {
- 	return new Promise((resolve, reject) => {
- 		const proc = cp.spawn('signtool.exe', ['verify', '/pa', filePath]);
--		proc.on('error', reject);
-+		proc.on('error', () => resolve(false)); // Minv: unsigned builds, signtool may not be on PATH
- 		proc.on('exit', code => resolve(code === 0));
- 	});
- }
-@@ -659,11 +659,11 @@ function patchWin32DependenciesTask(destinationFolderName: string) {
- 			await rcedit(fullPath, {
- 				'file-version': baseVersion,
- 				'version-string': {
--					'CompanyName': 'Microsoft Corporation',
-+					'CompanyName': product.nameLong, // Minv
- 					'FileDescription': product.nameLong,
- 					'FileVersion': packageJson.version,
- 					'InternalName': basename,
--					'LegalCopyright': 'Copyright (C) 2026 Microsoft. All rights reserved',
-+					'LegalCopyright': 'MIT License. Built from Code-OSS, Copyright (C) Microsoft Corporation', // Minv
- 					'OriginalFilename': basename,
- 					'ProductName': product.nameLong,
- 					'ProductVersion': packageJson.version,
