@@ -21,6 +21,7 @@
   "win32TunnelServiceMutex": "minv-tunnelservice",
   "win32TunnelMutex": "minv-tunnel",
   "darwinBundleIdentifier": "sh.kaf.minv",
+  "linuxDesktopName": "minv",
   "linuxIconName": "minv",
   "urlProtocol": "minv",
   "licenseUrl": "https://github.com/tyrannyme/minv/blob/main/LICENSE",
