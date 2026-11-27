@@ -13,7 +13,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const source = join(root, '.upstream/build');
 const windows = process.platform === 'win32';
 const built = join(root, windows ? '.upstream/VSCode-win32-x64' : '.upstream/VSCode-linux-x64');
-if (!existsSync(join(built, windows ? 'Minv.exe' : 'minv'))) throw new Error('Build the app first: npm run build');
+if (!existsSync(join(built, windows ? 'Minv.exe' : 'minv'))) throw new Error('Build the app first: pnpm run build');
 const { version } = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 const formats = process.argv.slice(2).length ? process.argv.slice(2) : windows ? ['exe', 'zip'] : ['tar', 'deb', 'rpm', 'appimage'];
 const release = join(root, 'build/release');
@@ -21,7 +21,7 @@ rmSync(release, { recursive: true, force: true });
 mkdirSync(release, { recursive: true });
 cpSync(join(root, 'LICENSE'), join(built, 'LICENSE-minv.txt'));
 
-const gulp = task => execFileSync('npm', ['run', '--silent', 'gulp', task], { cwd: source, stdio: 'inherit', shell: windows, env: { ...process.env, MINV_VERSION: version } });
+const gulp = task => execFileSync('pnpm', ['run', '--silent', 'gulp', task], { cwd: source, stdio: 'inherit', shell: windows, env: { ...process.env, MINV_VERSION: version } });
 const only = (dir, extension) => {
   const files = readdirSync(dir).filter(name => name.endsWith(extension));
   if (files.length !== 1) throw new Error(`Expected one ${extension} in ${dir}, found: ${files.join(', ') || 'none'}`);

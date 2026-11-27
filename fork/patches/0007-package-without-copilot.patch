@@ -1,8 +1,8 @@
 diff --git a/build/gulpfile.vscode.ts b/build/gulpfile.vscode.ts
-index 0256e9ea..8362e9d0 100644
+index 331fc071..17cded63 100644
 --- a/build/gulpfile.vscode.ts
 +++ b/build/gulpfile.vscode.ts
-@@ -61,8 +61,8 @@ function getLockedPackageVersion(packageName: string): string {
+@@ -60,8 +60,8 @@ function getLockedPackageVersion(packageName: string): string {
  
  const sourceMappingURLBase = `https://main.vscode-cdn.net/sourcemaps/${commit}`;
  const isCI = !!process.env['CI'] || !!process.env['BUILD_ARTIFACTSTAGINGDIRECTORY'] || !!process.env['GITHUB_WORKSPACE'];
@@ -13,15 +13,15 @@ index 0256e9ea..8362e9d0 100644
  
  const coreCIOutBuildTask = task.series(
  	checkApiProposalNamesTask,
-@@ -260,6 +260,7 @@ function packageTask(platform: string, arch: string, sourceFolderName: string, d
- 			.pipe(filter(getCopilotExcludeFilter(platform, arch)))
- 			.pipe(filter(getCopilotTgrepExcludeFilter(platform, arch)))
- 			.pipe(filter(getRipgrepExcludeFilter(platform, arch)))
-+			.pipe(filter(['**', '!**/node_modules/@github/copilot*/**', '!**/node_modules/@microsoft/mxc-sdk/**'])) // Minv: no Copilot runtime
- 			.pipe(filter(getFoundryLocalExcludeFilter()))
- 			.pipe(filter(getOSProxyResolverExcludeFilter(platform, arch)))
+@@ -261,6 +261,7 @@ function packageTask(platform: string, arch: string, sourceFolderName: string, d
+ 			.pipe(filter(getCopilotExcludeFilter(platform, arch), { dot: true }))
+ 			.pipe(filter(getCopilotTgrepExcludeFilter(platform, arch), { dot: true }))
+ 			.pipe(filter(getRipgrepExcludeFilter(platform, arch), { dot: true }))
++			.pipe(filter(['**', '!**/node_modules/@github/copilot*/**', '!**/node_modules/@microsoft/copilot-sdk*/**'], { dot: true })) // Minv: no Copilot runtime
+ 			.pipe(filter(getFoundryLocalExcludeFilter(), { dot: true }))
+ 			.pipe(filter(getOSProxyResolverExcludeFilter(platform, arch), { dot: true }))
  			.pipe(jsFilter)
-@@ -566,6 +567,9 @@ function prepareCopilotRipgrepShimTask(platform: string, arch: string, destinati
+@@ -567,6 +568,9 @@ function prepareCopilotRipgrepShimTask(platform: string, arch: string, destinati
  		const appNodeModulesDir = path.join(appBase, 'node_modules.asar.unpacked');
  
  		const builtInCopilotExtensionDir = path.join(appBase, 'extensions', 'copilot');

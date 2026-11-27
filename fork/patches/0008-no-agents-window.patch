@@ -1,8 +1,8 @@
 diff --git a/build/gulpfile.vscode.ts b/build/gulpfile.vscode.ts
-index 8362e9d0..dd29d868 100644
+index 17cded63..02ee2949 100644
 --- a/build/gulpfile.vscode.ts
 +++ b/build/gulpfile.vscode.ts
-@@ -149,10 +149,6 @@ function packageTask(platform: string, arch: string, sourceFolderName: string, d
+@@ -148,10 +148,6 @@ function packageTask(platform: string, arch: string, sourceFolderName: string, d
  			'vs/workbench/api/node/extensionHostProcess.js',
  			'vs/code/electron-browser/workbench/workbench.html',
  			'vs/code/electron-browser/workbench/workbench.js',
@@ -14,13 +14,13 @@ index 8362e9d0..dd29d868 100644
  
  		const src = gulp.src(out + '/**', { base: '.' })
 diff --git a/build/next/index.ts b/build/next/index.ts
-index 084aa56f..09106835 100644
+index 22b6a733..3ae12643 100644
 --- a/build/next/index.ts
 +++ b/build/next/index.ts
-@@ -103,13 +103,9 @@ const desktopWorkerEntryPoints = [
+@@ -104,13 +104,9 @@ const desktopWorkerEntryPoints = [
  // Desktop workbench and code entry points
  const desktopEntryPoints = [
- 	'vs/workbench/workbench.desktop.main',
+ 	desktopWorkbenchEntryPoint,
 -	'vs/sessions/sessions.desktop.main',
  	'vs/workbench/contrib/debug/node/telemetryApp',
  	'vs/platform/files/node/watcher/watcherMain',
@@ -31,7 +31,7 @@ index 084aa56f..09106835 100644
  	'vs/workbench/api/node/extensionHostProcess',
  ];
  
-@@ -117,7 +113,6 @@ const codeEntryPoints = [
+@@ -118,7 +114,6 @@ const codeEntryPoints = [
  	'vs/code/node/cliProcessMain',
  	'vs/code/electron-utility/sharedProcess/sharedProcessMain',
  	'vs/code/electron-browser/workbench/workbench',
@@ -39,7 +39,7 @@ index 084aa56f..09106835 100644
  ];
  
  // Additional web-only entry points (CDN build only, not in server-web)
-@@ -137,8 +132,6 @@ const serverEntryPoints = [
+@@ -138,8 +133,6 @@ const serverEntryPoints = [
  	'vs/workbench/api/node/extensionHostProcess',
  	'vs/platform/files/node/watcher/watcherMain',
  	'vs/platform/terminal/node/ptyHostMain',
@@ -48,9 +48,9 @@ index 084aa56f..09106835 100644
  ];
  
  /**
-@@ -185,8 +178,6 @@ function getCssBundleEntryPointsForTarget(target: BuildTarget): Set<string> {
+@@ -192,8 +185,6 @@ function getCssBundleEntryPointsForTarget(target: BuildTarget): Set<string> {
  			return new Set([
- 				'vs/workbench/workbench.desktop.main',
+ 				desktopWorkbenchEntryPoint,
  				'vs/code/electron-browser/workbench/workbench',
 -				'vs/sessions/sessions.desktop.main',
 -				'vs/sessions/electron-browser/sessions',
@@ -58,10 +58,10 @@ index 084aa56f..09106835 100644
  		case 'server':
  			return new Set(); // Server has no UI
 diff --git a/build/next/resources.ts b/build/next/resources.ts
-index 78acb6bc..63914115 100644
+index e76a1e35..c4938974 100644
 --- a/build/next/resources.ts
 +++ b/build/next/resources.ts
-@@ -37,8 +37,6 @@ const desktopResourcePatterns = [
+@@ -38,8 +38,6 @@ const desktopResourcePatterns = [
  	// HTML
  	'vs/code/electron-browser/workbench/workbench.html',
  	'vs/code/electron-browser/workbench/workbench-dev.html',

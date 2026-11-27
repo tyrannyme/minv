@@ -1,5 +1,5 @@
 diff --git a/build/gulpfile.vscode.linux.ts b/build/gulpfile.vscode.linux.ts
-index 121cbc83..5410190e 100644
+index 76a2f429..b3759171 100644
 --- a/build/gulpfile.vscode.linux.ts
 +++ b/build/gulpfile.vscode.linux.ts
 @@ -27,6 +27,7 @@ const copilotLinkHelper = readFileSync(path.join(root, 'resources/linux/copilot-
@@ -10,7 +10,7 @@ index 121cbc83..5410190e 100644
  
  function getDebPackageArch(arch: string): string {
  	switch (arch) {
-@@ -92,7 +93,7 @@ function prepareDebPackage(arch: string) {
+@@ -100,7 +101,7 @@ function prepareDebPackage(arch: string) {
  				const that = this;
  				gulp.src('resources/linux/debian/control.template', { base: '.' })
  					.pipe(replace('@@NAME@@', product.applicationName))
@@ -19,7 +19,7 @@ index 121cbc83..5410190e 100644
  					.pipe(replace('@@ARCHITECTURE@@', debArch))
  					.pipe(replace('@@DEPENDS@@', dependencies.join(', ')))
  					.pipe(replace('@@RECOMMENDS@@', debianRecommendedDependencies.join(', ')))
-@@ -116,11 +117,8 @@ function prepareDebPackage(arch: string) {
+@@ -124,11 +125,8 @@ function prepareDebPackage(arch: string) {
  			.pipe(replace('@@ARCHITECTURE@@', debArch))
  			.pipe(rename('DEBIAN/postinst'));
  
@@ -27,13 +27,13 @@ index 121cbc83..5410190e 100644
 -			.pipe(replace('@@NAME@@', product.applicationName))
 -			.pipe(rename('DEBIAN/templates'));
 -
--		const all = es.merge(control, templates, postinst, postrm, prerm, desktops, appdata, workspaceMime, icon, bash_completion, zsh_completion, code);
+-		const all = merge(control, templates, postinst, postrm, prerm, desktops, appdata, workspaceMime, icon, bash_completion, zsh_completion, code);
 +		// Minv: no debconf templates; they only ask about adding Microsoft's apt repository.
-+		const all = es.merge(control, postinst, postrm, prerm, desktops, appdata, workspaceMime, icon, bash_completion, zsh_completion, code);
++		const all = merge(control, postinst, postrm, prerm, desktops, appdata, workspaceMime, icon, bash_completion, zsh_completion, code);
  
  		return all.pipe(vfs.dest(destination));
  	};
-@@ -204,7 +202,7 @@ function prepareRpmPackage(arch: string) {
+@@ -212,7 +210,7 @@ function prepareRpmPackage(arch: string) {
  			.pipe(replace('@@NAME_LONG@@', product.nameLong))
  			.pipe(replace('@@DESKTOP_NAME@@', linuxDesktopName))
  			.pipe(replace('@@ICON@@', product.linuxIconName))

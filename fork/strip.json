@@ -25,7 +25,6 @@
     "surveys/browser/nps.contribution.js",
     "surveys/browser/languageSurveys.contribution.js",
     "welcomeGettingStarted/browser/gettingStarted.contribution.js",
-    "welcomeAgentSessions/browser/agentSessionsWelcome.contribution.js",
     "welcomeWalkthrough/browser/walkThrough.contribution.js",
     "welcomeOnboarding/browser/welcomeOnboarding.contribution.js",
     "onboarding/browser/onboarding.contribution.js",

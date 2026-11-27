@@ -5,7 +5,7 @@
 <p align="center">
   <a href="https://github.com/tyrannyme/minv/actions/workflows/ci.yml"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/ci/tyrannyme/minv.svg?workflow=ci.yml&amp;branch=main&amp;variant=outline&amp;size=sm&amp;font=geist&amp;mode=dark"><img alt="CI status" src="https://shieldcn.dev/github/ci/tyrannyme/minv.svg?workflow=ci.yml&amp;branch=main&amp;variant=outline&amp;size=sm&amp;font=geist&amp;mode=light"></picture></a>
   <a href="https://github.com/tyrannyme/minv/releases"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/release/tyrannyme/minv.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=dark"><img alt="Latest release" src="https://shieldcn.dev/github/release/tyrannyme/minv.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=light"></picture></a>
-  <a href="fork/upstream.json"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Code--OSS-1.145.2.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=dark"><img alt="Based on Code-OSS 1.145.2" src="https://shieldcn.dev/badge/Code--OSS-1.145.2.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=light"></picture></a>
+  <a href="fork/upstream.json"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Code--OSS-1.148.0.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=dark"><img alt="Based on Code-OSS 1.148.0" src="https://shieldcn.dev/badge/Code--OSS-1.148.0.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=light"></picture></a>
   <a href="LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/license-MIT.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=dark"><img alt="MIT license" src="https://shieldcn.dev/badge/license-MIT.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=light"></picture></a>
 </p>
 
@@ -44,7 +44,7 @@ Linux and Windows on x64, and you need Git installed. Minv keeps its settings in
 
 ## Build
 
-You need Node.js 24.22.1, Git, a C/C++ toolchain, and the X11 keyboard, libsecret and Kerberos development headers (`libxkbfile-devel libsecret-devel krb5-devel` on Fedora, `libxkbfile-dev libsecret-1-dev libkrb5-dev` on Debian and Ubuntu).
+You need Node.js 24.22.1, pnpm (the version Code-OSS pins in its `packageManager`), Git, a C/C++ toolchain, and the X11 keyboard, libsecret and Kerberos development headers (`libxkbfile-devel libsecret-devel krb5-devel` on Fedora, `libxkbfile-dev libsecret-1-dev libkrb5-dev` on Debian and Ubuntu).
 
 ```sh
 npm run setup      # fetch the pinned Code-OSS source, apply Minv's changes, install its dependencies
@@ -76,7 +76,7 @@ Minv's changes to Code-OSS live in [`fork/`](fork). [`scripts/fork-prepare.mjs`]
 
 VS Code's chat and MCP services stay registered, though nothing uses them, because Tasks and the terminal depend on them. `chat.disableAIFeatures` is on, and every AI view, extension and the Agents window are removed.
 
-Pushing a tag `v<version>` that matches `package.json` builds, smoke-tests and publishes a release. CI compiles native modules against upstream's glibc 2.28 sysroot, so the Linux packages run wherever VS Code does. Before publishing, it installs the .deb on Ubuntu, the .rpm on Fedora, and the Windows installer on Windows, and opens the app from the archive, the .deb, the AppImage and the Windows install. `npm run package -- tar rpm` builds only some formats; the .deb needs `dpkg-deb`, the .rpm `rpmbuild`, and the AppImage `appimagetool` (or `APPIMAGETOOL=/path/to/it`). On Windows, build with `npm run gulp vscode-win32-x64-min` in `.upstream/build`, then `npm run package` makes the installer and zip.
+Pushing a tag `v<version>` that matches `package.json` builds, smoke-tests and publishes a release. CI compiles native modules against upstream's glibc 2.28 sysroot, so the Linux packages run wherever VS Code does. Before publishing, it installs the .deb on Ubuntu, the .rpm on Fedora, and the Windows installer on Windows, and opens the app from the archive, the .deb, the AppImage and the Windows install. `npm run package -- tar rpm` builds only some formats; the .deb needs `dpkg-deb`, the .rpm `rpmbuild`, and the AppImage `appimagetool` (or `APPIMAGETOOL=/path/to/it`). On Windows, build with `pnpm run gulp vscode-win32-x64-min` in `.upstream/build`, then `npm run package` makes the installer and zip.
 
 ## License
 
